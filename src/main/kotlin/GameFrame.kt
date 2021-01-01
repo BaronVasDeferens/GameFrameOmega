@@ -2,18 +2,14 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import java.awt.Canvas
 import java.awt.Dimension
 import java.awt.Graphics2D
 import java.awt.GraphicsEnvironment
 import java.awt.event.KeyListener
 import java.awt.image.BufferedImage
-import java.nio.Buffer
-import java.util.concurrent.Executors
 import javax.swing.JFrame
 import javax.swing.event.MouseInputAdapter
-import kotlin.coroutines.CoroutineContext
 
 
 class GameFrame(
@@ -51,8 +47,6 @@ class GameFrame(
         imageState.onEach { image ->
             drawImage(image)
         }.launchIn(GlobalScope)
-
-
     }
 
     fun setKeyListener(listener: KeyListener) {
