@@ -17,6 +17,7 @@ object MainBrain {
     private val entities = mutableListOf<Entity>()
 
     init {
+        // Put ins some "spites."
         for (j in 0..50) {
             for (k in 0..50) {
                 entities.add(Entity(j * 10, k * 10))
@@ -27,7 +28,7 @@ object MainBrain {
     @JvmStatic
     fun main(args: Array<String>) {
 
-        val isPaused = AtomicBoolean(true)
+        val isPaused = AtomicBoolean(false)
 
         val gameFrame = GameFrame("Let's try and animations! 2021", width, height, imageState)
         gameFrame.setKeyListener(keyListener)
@@ -42,7 +43,6 @@ object MainBrain {
 
                     KeyboardInputAdapter.KeyState.PAUSE -> {
                         isPaused.set(!isPaused.get())
-                        println(">>> paused: ${isPaused.get()}")
                     }
 
                     KeyboardInputAdapter.KeyState.QUIT -> {
