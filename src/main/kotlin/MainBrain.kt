@@ -15,15 +15,16 @@ object MainBrain {
     private val keyListener = KeyboardInputAdapter(keyInputState)
 
     private val entities = mutableListOf<Entity>()
+    private val sprites = mutableListOf<Sprite>()
+    private val playerSprite = Sprite(50,100, "sprite1.png")
 
-    init {
-        // Put ins some "spites."
-        for (j in 0..50) {
-            for (k in 0..50) {
-                entities.add(Entity(j * 10, k * 10))
-            }
-        }
-    }
+//    init {
+//        for (j in 0..5) {
+//            for (k in 0..5) {
+//                sprites.add(Sprite(j * 50,k * 100, "sprite1.png"))
+//            }
+//        }
+//    }
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -37,6 +38,9 @@ object MainBrain {
         while (true) {
 
             // TODO: process input
+            playerSprite.move(keyInputState.value)
+
+
             keyInputState.value.forEach { state ->
 
                 when (state) {
@@ -52,7 +56,7 @@ object MainBrain {
             }
 
             // Clear all input state
-            keyInputState.value = setOf()
+            // keyInputState.value = setOf()
 
             if (!isPaused.get()) {
                 update()
@@ -67,6 +71,12 @@ object MainBrain {
         entities.forEach { entity ->
             entity.update()
         }
+
+        sprites.forEach { sprite ->
+            sprite.update()
+        }
+
+        playerSprite.update()
     }
 
     private fun render() {
@@ -75,13 +85,17 @@ object MainBrain {
         g.color = Color.BLACK
         g.fillRect(0, 0, width, height)
 
-        entities.forEach { entity ->
-            g.color = entity.color
-            g.drawRect(entity.x, entity.y, 5, 5)
+//        entities.forEach { entity ->
+//            g.color = entity.color
+//            g.drawRect(entity.x, entity.y, 5, 5)
+//        }
+
+        sprites.forEach { sprite ->
+            sprite.render(g)
         }
 
-        g.color = Color.RED
-        g.drawString("${System.currentTimeMillis()}", 50.0f, 50.0f)
+        playerSprite.render(g)
+
         g.dispose()
 
         imageState.value = image

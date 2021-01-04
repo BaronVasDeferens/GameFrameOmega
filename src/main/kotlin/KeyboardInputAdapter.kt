@@ -6,7 +6,11 @@ class KeyboardInputAdapter(private val keyState: MutableStateFlow<Set<KeyState>>
 
     enum class KeyState {
         PAUSE,
-        QUIT
+        QUIT,
+        MOVE_UP,
+        MOVE_DOWN,
+        MOVE_LEFT,
+        MOVE_RIGHT
     }
 
     override fun keyTyped(e: KeyEvent?) {
@@ -23,11 +27,54 @@ class KeyboardInputAdapter(private val keyState: MutableStateFlow<Set<KeyState>>
                 KeyEvent.VK_ESCAPE -> {
                     keyState.value = keyState.value.plus(KeyState.QUIT)
                 }
+
+                KeyEvent.VK_A -> {
+                    keyState.value = keyState.value.plus(KeyState.MOVE_LEFT)
+                }
+
+                KeyEvent.VK_D -> {
+                    keyState.value = keyState.value.plus(KeyState.MOVE_RIGHT)
+                }
+
+                KeyEvent.VK_W -> {
+                    keyState.value = keyState.value.plus(KeyState.MOVE_UP)
+                }
+
+                KeyEvent.VK_S -> {
+                    keyState.value = keyState.value.plus(KeyState.MOVE_DOWN)
+                }
+
+                else -> {
+                    println("Key: ${e.keyChar}")
+                }
             }
         }
     }
 
     override fun keyReleased(e: KeyEvent?) {
+        e?.apply {
+            when (e.keyCode) {
 
+                KeyEvent.VK_A -> {
+                    keyState.value = keyState.value.minus(KeyState.MOVE_LEFT)
+                }
+
+                KeyEvent.VK_D -> {
+                    keyState.value = keyState.value.minus(KeyState.MOVE_RIGHT)
+                }
+
+                KeyEvent.VK_W -> {
+                    keyState.value = keyState.value.minus(KeyState.MOVE_UP)
+                }
+
+                KeyEvent.VK_S -> {
+                    keyState.value = keyState.value.minus(KeyState.MOVE_DOWN)
+                }
+
+                else -> {
+                    println("Key: ${e.keyChar}")
+                }
+            }
+        }
     }
 }
