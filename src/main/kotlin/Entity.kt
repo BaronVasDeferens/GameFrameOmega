@@ -1,6 +1,7 @@
 import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import javax.imageio.ImageIO
 import kotlin.random.Random
@@ -8,7 +9,7 @@ import kotlin.random.Random
 data class Sprite(var x: Int, var y: Int, val imageFileName: String) {
 
     companion object {
-        val random = Random(System.currentTimeMillis())
+        private val random = Random(System.currentTimeMillis())
         fun randomRange(min: Int, max: Int): Int {
             return random.nextInt(max) + min
         }
@@ -25,13 +26,17 @@ data class Sprite(var x: Int, var y: Int, val imageFileName: String) {
 
     private val spriteArrayMax = 5 // 6 = frames 0 - 5
     private val currentSpriteIndex = AtomicInteger(randomRange(0, 5));
-    private val updateAfterTicks = 10
+    private val updateAfterTicks = 8
     private val currentTick = AtomicInteger(0)
 
-
+    private val isRunning = AtomicBoolean(false)
     private val movementAllotment = 2;
 
     fun move(directions: Set<KeyboardInputAdapter.KeyState>) {
+
+        if (directions.isEmpty()) {
+            isRunning.set(false)
+        }
 
         directions.forEach { state ->
 
@@ -39,21 +44,22 @@ data class Sprite(var x: Int, var y: Int, val imageFileName: String) {
 
                 KeyboardInputAdapter.KeyState.MOVE_UP -> {
                     y -= movementAllotment
+                    isRunning.set(true)
                 }
 
                 KeyboardInputAdapter.KeyState.MOVE_DOWN -> {
                     y += movementAllotment
+                    isRunning.set(true)
                 }
 
                 KeyboardInputAdapter.KeyState.MOVE_LEFT -> {
                     x -= movementAllotment
+                    isRunning.set(true)
                 }
 
                 KeyboardInputAdapter.KeyState.MOVE_RIGHT -> {
                     x += movementAllotment
-                }
-                else -> {
-
+                    isRunning.set(true)
                 }
             }
         }
@@ -62,16 +68,18 @@ data class Sprite(var x: Int, var y: Int, val imageFileName: String) {
 
     fun update() {
 
-        // x += 2 // move to the right for funsies
-        // if (x > 500) x = -40
+        if (isRunning.get()) {
 
-        if (currentTick.incrementAndGet() == updateAfterTicks) {
-            currentTick.set(0)
+            if (currentTick.incrementAndGet() == updateAfterTicks) {
+                currentTick.set(0)
 
-            if (currentSpriteIndex.incrementAndGet() > spriteArrayMax) {
-                currentSpriteIndex.set(0)
+                if (currentSpriteIndex.incrementAndGet() > spriteArrayMax) {
+                    currentSpriteIndex.set(0)
+                }
+                subImage = image.getSubimage(width * currentSpriteIndex.get(), 0, width, height)
             }
-            subImage = image.getSubimage(width * currentSpriteIndex.get(), 0, width, height)
+        } else {
+            subImage = image.getSubimage(0, height, width, height)
         }
     }
 
