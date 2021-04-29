@@ -8,11 +8,9 @@ import kotlin.random.Random
 
 data class Sprite(var x: Int, var y: Int, val imageFileName: String) {
 
-    companion object {
-        private val random = Random(System.currentTimeMillis())
-        fun randomRange(min: Int, max: Int): Int {
-            return random.nextInt(max) + min
-        }
+    private val random = Random(System.currentTimeMillis())
+    fun randomRange(min: Int, max: Int): Int {
+        return random.nextInt(max) + min
     }
 
 
@@ -76,6 +74,7 @@ data class Sprite(var x: Int, var y: Int, val imageFileName: String) {
                 if (currentSpriteIndex.incrementAndGet() > spriteArrayMax) {
                     currentSpriteIndex.set(0)
                 }
+
                 subImage = image.getSubimage(width * currentSpriteIndex.get(), 0, width, height)
             }
         } else {

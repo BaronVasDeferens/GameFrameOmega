@@ -5,10 +5,14 @@ import java.awt.image.BufferedImage
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
 
-object MainBrain {
+fun main(args: Array<String>) {
+    MainBrain()
+}
 
-    private const val width = 500
-    private const val height = 500
+class MainBrain() {
+
+    private val width = 500
+    private val height = 500
     private val imageState = MutableStateFlow(BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB))
 
     private val keyInputState = MutableStateFlow<Set<KeyboardInputAdapter.KeyState>>(setOf())
@@ -18,16 +22,7 @@ object MainBrain {
     private val sprites = mutableListOf<Sprite>()
     private val playerSprite = Sprite(50,100, "sprite1.png")
 
-//    init {
-//        for (j in 0..5) {
-//            for (k in 0..5) {
-//                sprites.add(Sprite(j * 50,k * 100, "sprite1.png"))
-//            }
-//        }
-//    }
-
-    @JvmStatic
-    fun main(args: Array<String>) {
+    init {
 
         val isPaused = AtomicBoolean(false)
 
@@ -54,9 +49,6 @@ object MainBrain {
                     }
                 }
             }
-
-            // Clear all input state
-            // keyInputState.value = setOf()
 
             if (!isPaused.get()) {
                 update()
@@ -85,10 +77,10 @@ object MainBrain {
         g.color = Color.BLACK
         g.fillRect(0, 0, width, height)
 
-//        entities.forEach { entity ->
-//            g.color = entity.color
-//            g.drawRect(entity.x, entity.y, 5, 5)
-//        }
+        entities.forEach { entity ->
+            g.color = entity.color
+            g.drawRect(entity.x, entity.y, 5, 5)
+        }
 
         sprites.forEach { sprite ->
             sprite.render(g)
