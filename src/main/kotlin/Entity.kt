@@ -24,11 +24,11 @@ data class Sprite(var x: Int, var y: Int, val imageFileName: String) {
 
     private val spriteArrayMax = 5 // 6 = frames 0 - 5
     private val currentSpriteIndex = AtomicInteger(randomRange(0, 5));
-    private val updateAfterTicks = 8
+    private val updateAfterTicks = 4
     private val currentTick = AtomicInteger(0)
 
     private val isRunning = AtomicBoolean(false)
-    private val movementAllotment = 2;
+    private val movementAllotment = 3;
 
     fun move(directions: Set<KeyboardInputAdapter.KeyState>) {
 
