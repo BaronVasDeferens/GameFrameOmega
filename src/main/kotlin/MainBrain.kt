@@ -20,7 +20,10 @@ class MainBrain() {
 
     private val entities = mutableListOf<Entity>()
     private val sprites = mutableListOf<Sprite>()
-    private val playerSprite = Sprite(50,100, "sprite1.png")
+    private val playerSprite = Sprite(50, 100, "sprite1.png")
+
+    private val mouseSprite = Mouse(100, 100, "mouse.png")
+    private val mech = Mech(200, 200)
 
     init {
 
@@ -33,7 +36,9 @@ class MainBrain() {
         while (true) {
 
             // TODO: process input
-            playerSprite.move(keyInputState.value)
+            // playerSprite.move(keyInputState.value)
+//                mouseSprite.move(keyInputState.value)
+            mech.move(keyInputState.value)
 
 
             keyInputState.value.forEach { state ->
@@ -55,7 +60,7 @@ class MainBrain() {
                 render()
             }
 
-            Thread.sleep(1000/60);
+            Thread.sleep(1000 / 60);
         }
     }
 
@@ -68,7 +73,9 @@ class MainBrain() {
             sprite.update()
         }
 
-        playerSprite.update()
+//        playerSprite.update()
+//        mouseSprite.update()
+        mech.update()
     }
 
     private fun render() {
@@ -86,8 +93,9 @@ class MainBrain() {
             sprite.render(g)
         }
 
-        playerSprite.render(g)
-
+//        playerSprite.render(g)
+//        mouseSprite.render(g)
+        mech.render(g)
         g.dispose()
 
         imageState.value = image
