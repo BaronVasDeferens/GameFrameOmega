@@ -4,18 +4,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import javax.imageio.ImageIO
 
-enum class Orientation {
-    UP,
-    RIGHT,
-    DOWN,
-    LEFT
-}
 
-class Mouse(
+class Hero (
     var x: Int,
     var y: Int,
-    // var turretOrientation: Orientation,
-    spriteFileName: String
+    spriteFileName: String = "Character1Walk.png"
 ) {
     private var spriteSheet: BufferedImage = ImageIO.read(javaClass.classLoader.getResourceAsStream(spriteFileName))
     private val frameRow = AtomicInteger(0)
@@ -24,8 +17,9 @@ class Mouse(
     private val isMoving = AtomicBoolean(false)
     private val movementPerUpdate = 2
     private val ticksPerFrame = 4
+    private val maxColumns = 8
+    private val frameSize = 64
     private val currentTicks = AtomicInteger(0)
-
 
 
     fun move(directions: Set<KeyboardInputAdapter.KeyState>) {
@@ -42,7 +36,7 @@ class Mouse(
                 }
 
                 KeyboardInputAdapter.KeyState.MOVE_RIGHT -> {
-                    frameRow.set(1)
+                    frameRow.set(3)
                     x += movementPerUpdate
                 }
 
@@ -52,7 +46,7 @@ class Mouse(
                 }
 
                 KeyboardInputAdapter.KeyState.MOVE_LEFT -> {
-                    frameRow.set(3)
+                    frameRow.set(1)
                     x -= movementPerUpdate
                 }
 
@@ -68,8 +62,7 @@ class Mouse(
             println(currentTicks.get())
 
             if (currentTicks.incrementAndGet() >= ticksPerFrame) {
-
-                frameColumn.set(frameColumn.incrementAndGet() % 2)
+                frameColumn.set(frameColumn.incrementAndGet() % maxColumns)
                 currentTicks.set(0)
             } else {
 
@@ -85,7 +78,7 @@ class Mouse(
     }
 
     fun render(graphics2D: Graphics2D) {
-        val targetFrame = spriteSheet.getSubimage(frameColumn.get() * 32, frameRow.get() * 32, 32, 32)
+        val targetFrame = spriteSheet.getSubimage(frameColumn.get() * frameSize, frameRow.get() * frameSize, frameSize, frameSize)
         graphics2D.drawImage(targetFrame, x, y, null)
     }
 
