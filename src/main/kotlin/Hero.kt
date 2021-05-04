@@ -14,9 +14,9 @@ class Hero (
     private val frameRow = AtomicInteger(0)
     private val frameColumn = AtomicInteger(0)
 
-    private val isMoving = AtomicBoolean(false)
-    private val movementPerUpdate = 2
-    private val ticksPerFrame = 4
+    val isMoving = AtomicBoolean(false)
+    val movementPerUpdate = 2
+    val ticksPerFrame = 4
     private val maxColumns = 8
     private val frameSize = 64
     private val currentTicks = AtomicInteger(0)
