@@ -64,6 +64,7 @@ class WorldMap(
         if (hero.isMoving.get()) {
             // crudely define the "movement zone"
             val leftRightZoneSize = windowWidth / 3
+            val upDownZoneSize = windowWidth / 3
 
             // RIGHT SCROLL
             val rightZoneX = windowWidth - leftRightZoneSize
@@ -78,6 +79,24 @@ class WorldMap(
             if (hero.x > windowX && hero.x < windowX + leftRightZoneSize) {
                 if (windowX - hero.movementPerUpdate > 0) {
                     windowX -= hero.movementPerUpdate
+                    return
+                }
+            }
+
+            // UP SCROLL
+            if (hero.y > windowY && hero.y < windowY + upDownZoneSize) {
+                if (windowY - hero.movementPerUpdate > 0) {
+                    windowY -= hero.movementPerUpdate
+                    return
+                }
+            }
+
+            // DOWN SCROLL
+            val downZoneX = windowHeight - upDownZoneSize
+            if (hero.y >= windowY + downZoneX) {
+                if (windowY + hero.movementPerUpdate < floorImage.height - windowHeight) {
+                    windowY += hero.movementPerUpdate
+                    return
                 }
             }
         }
@@ -85,10 +104,10 @@ class WorldMap(
 
     fun render(entities: List<Renderable>, graphics2D: Graphics2D) {
 
-        println(">>> window location: $windowX, $windowY")
-
-        val hero = entities[0] as Hero
-        println(">>> player at: ${hero.x}, ${hero.y}")
+//        println(">>> window location: $windowX, $windowY")
+//
+//        val hero = entities[0] as Hero
+//        println(">>> player at: ${hero.x}, ${hero.y}")
 
         val floorCopy = BufferedImage(columns * blockSize, rows * blockSize, BufferedImage.TYPE_INT_ARGB)
         val copyGraphics = floorCopy.createGraphics()
