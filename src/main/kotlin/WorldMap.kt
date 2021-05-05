@@ -1,4 +1,5 @@
 import java.awt.Graphics2D
+import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import java.nio.Buffer
 import javax.imageio.ImageIO
@@ -24,10 +25,12 @@ class WorldMap(
     val rows: Int,
     val windowWidth: Int = 500,
     val windowHeight: Int = 500,
-    ) : Renderable {
+) {
 
-    private val floorTileImage1: BufferedImage = ImageIO.read(javaClass.classLoader.getResourceAsStream("floorGreyTest.png"))
-    private val floorTileImage2: BufferedImage = ImageIO.read(javaClass.classLoader.getResourceAsStream("floorGreyTest2.png"))
+    private val floorTileImage1: BufferedImage =
+        ImageIO.read(javaClass.classLoader.getResourceAsStream("floorGreyTest.png"))
+    private val floorTileImage2: BufferedImage =
+        ImageIO.read(javaClass.classLoader.getResourceAsStream("floorGreyTest2.png"))
 
     private lateinit var floorImage: BufferedImage
 
@@ -37,7 +40,7 @@ class WorldMap(
     private val floorTiles: Array<Array<Block>> = Array(rows) { rowNum ->
         Array(columns) { colNum ->
 
-            val tile = if(Random.nextBoolean()) {
+            val tile = if (Random.nextBoolean()) {
                 floorTileImage1
             } else {
                 floorTileImage2
@@ -57,16 +60,44 @@ class WorldMap(
     }
 
     fun moveWindow(hero: Hero) {
-        // crudely define the "movement zone"
-        val rightZoneX = windowWidth - (windowWidth / 5)
 
-        if (hero.x >= rightZoneX && hero.isMoving.get()) {
-            windowX += hero.movementPerUpdate
+        if (hero.isMoving.get()) {
+            // crudely define the "movement zone"
+            val leftRightZoneSize = windowWidth / 3
+
+            // RIGHT SCROLL
+            val rightZoneX = windowWidth - leftRightZoneSize
+            if (hero.x >= windowX + rightZoneX) {
+                if (windowX + hero.movementPerUpdate < floorImage.width - windowWidth) {
+                    windowX += hero.movementPerUpdate
+                    return
+                }
+            }
+
+            // LEFT SCROLL
+            if (hero.x > windowX && hero.x < windowX + leftRightZoneSize) {
+                if (windowX - hero.movementPerUpdate > 0) {
+                    windowX -= hero.movementPerUpdate
+                }
+            }
         }
     }
 
-    override fun render(graphics2D: Graphics2D) {
-        val window = floorImage.getSubimage(windowX, windowY, windowWidth, windowHeight)
+    fun render(entities: List<Renderable>, graphics2D: Graphics2D) {
+
+        println(">>> window location: $windowX, $windowY")
+
+        val hero = entities[0] as Hero
+        println(">>> player at: ${hero.x}, ${hero.y}")
+
+        val floorCopy = BufferedImage(columns * blockSize, rows * blockSize, BufferedImage.TYPE_INT_ARGB)
+        val copyGraphics = floorCopy.createGraphics()
+        copyGraphics.drawImage(floorImage, 0, 0, null)
+        entities.forEach { entity ->
+            entity.render(copyGraphics)
+        }
+        copyGraphics.dispose()
+        val window = floorCopy.getSubimage(windowX, windowY, windowWidth, windowHeight)
         graphics2D.drawImage(window, 0, 0, null)
     }
 

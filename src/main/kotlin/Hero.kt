@@ -9,13 +9,13 @@ class Hero (
     var x: Int,
     var y: Int,
     spriteFileName: String = "Character1Walk.png"
-) {
+): Renderable {
     private var spriteSheet: BufferedImage = ImageIO.read(javaClass.classLoader.getResourceAsStream(spriteFileName))
     private val frameRow = AtomicInteger(0)
     private val frameColumn = AtomicInteger(0)
 
     val isMoving = AtomicBoolean(false)
-    val movementPerUpdate = 2
+    val movementPerUpdate = 4
     val ticksPerFrame = 4
     private val maxColumns = 8
     private val frameSize = 64
@@ -59,8 +59,6 @@ class Hero (
 
     fun update() {
         if (isMoving.get()) {
-            println(currentTicks.get())
-
             if (currentTicks.incrementAndGet() >= ticksPerFrame) {
                 frameColumn.set(frameColumn.incrementAndGet() % maxColumns)
                 currentTicks.set(0)
@@ -77,7 +75,7 @@ class Hero (
 //        println("row: ${frameRow.get()} col: ${frameColumn.get()}")
     }
 
-    fun render(graphics2D: Graphics2D) {
+    override fun render(graphics2D: Graphics2D) {
         val targetFrame = spriteSheet.getSubimage(frameColumn.get() * frameSize, frameRow.get() * frameSize, frameSize, frameSize)
         graphics2D.drawImage(targetFrame, x, y, null)
     }
