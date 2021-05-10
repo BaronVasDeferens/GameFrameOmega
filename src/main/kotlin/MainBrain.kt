@@ -21,7 +21,7 @@ class MainBrain() {
     private val entities = mutableListOf<Entity>()
     private val sprites = mutableListOf<Sprite>()
 
-    private val map = WorldMap(64, 20, 20)
+    private val map = WorldMap(64, 20, 20, windowWidth = width, windowHeight = height)
 
     // private val playerSprite = Sprite(50, 100, "sprite1.png")
 //    private val mouseSprite = Mouse(100, 100, "mouse.png")

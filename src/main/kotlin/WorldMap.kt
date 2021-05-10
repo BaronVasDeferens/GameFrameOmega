@@ -1,3 +1,4 @@
+import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
@@ -28,9 +29,9 @@ class WorldMap(
 ) {
 
     private val floorTileImage1: BufferedImage =
-        ImageIO.read(javaClass.classLoader.getResourceAsStream("floorGreyTest.png"))
+        ImageIO.read(javaClass.classLoader.getResourceAsStream("floor_grey_basic.png"))
     private val floorTileImage2: BufferedImage =
-        ImageIO.read(javaClass.classLoader.getResourceAsStream("floorGreyTest2.png"))
+        ImageIO.read(javaClass.classLoader.getResourceAsStream("floor_grey_center_square.png"))
 
     private lateinit var floorImage: BufferedImage
 
@@ -68,7 +69,7 @@ class WorldMap(
 
             // RIGHT SCROLL
             val rightZoneX = windowWidth - leftRightZoneSize
-            if (hero.x >= windowX + rightZoneX) {
+            if (hero.x + hero.spriteSize >= windowX + rightZoneX) {
                 if (windowX + hero.movementPerUpdate < floorImage.width - windowWidth) {
                     windowX += hero.movementPerUpdate
                     return
@@ -115,6 +116,12 @@ class WorldMap(
         entities.forEach { entity ->
             entity.render(copyGraphics)
         }
+
+        // Draw window movement zones
+        copyGraphics.color = Color.RED
+        copyGraphics.drawRect(windowX, windowY, windowWidth / 3, windowHeight ) // left
+        copyGraphics.drawRect( windowX + (2 * windowWidth / 3), windowY, windowWidth /3, windowHeight ) // right
+
         copyGraphics.dispose()
         val window = floorCopy.getSubimage(windowX, windowY, windowWidth, windowHeight)
         graphics2D.drawImage(window, 0, 0, null)

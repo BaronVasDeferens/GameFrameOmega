@@ -8,7 +8,8 @@ import javax.imageio.ImageIO
 class Hero (
     var x: Int,
     var y: Int,
-    spriteFileName: String = "Character1Walk.png"
+    spriteFileName: String = "Character1Walk.png",
+    val spriteSize: Int = 64
 ): Renderable {
     private var spriteSheet: BufferedImage = ImageIO.read(javaClass.classLoader.getResourceAsStream(spriteFileName))
     private val frameRow = AtomicInteger(0)
