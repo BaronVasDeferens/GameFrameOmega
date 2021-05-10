@@ -60,7 +60,7 @@ class WorldMap(
         graphics2d.dispose()
     }
 
-    fun moveWindow(hero: Hero) {
+    fun moveWindow(hero: Player) {
 
         if (hero.isMoving.get()) {
             // crudely define the "movement zone"
@@ -118,9 +118,10 @@ class WorldMap(
         }
 
         // Draw window movement zones
-        copyGraphics.color = Color.RED
-        copyGraphics.drawRect(windowX, windowY, windowWidth / 3, windowHeight ) // left
-        copyGraphics.drawRect( windowX + (2 * windowWidth / 3), windowY, windowWidth /3, windowHeight ) // right
+        // TODO: test up/down zones
+//        copyGraphics.color = Color.RED
+//        copyGraphics.drawRect(windowX, windowY, windowWidth / 3, windowHeight ) // left
+//        copyGraphics.drawRect( windowX + (2 * windowWidth / 3), windowY, windowWidth /3, windowHeight ) // right
 
         copyGraphics.dispose()
         val window = floorCopy.getSubimage(windowX, windowY, windowWidth, windowHeight)

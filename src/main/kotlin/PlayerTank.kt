@@ -4,20 +4,26 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import javax.imageio.ImageIO
 
+abstract class Player(open var x: Int,
+                      open var y: Int,
+                      open val movementPerUpdate: Int,
+                      val spriteSize: Int = 64
+                      ) {
+    val isMoving = AtomicBoolean(false)
+}
 
-class Hero (
+class PlayerTank (
     override var x: Int,
     override var y: Int,
-    override val movementPerUpdate: Int = 4,
-    spriteFileName: String = "Character1Walk.png",
-
-): Player(x,y, movementPerUpdate), Renderable {
+    override val movementPerUpdate: Int = 2,
+    spriteFileName: String = "tank_sprite_sheet.png"
+): Player(x,y, movementPerUpdate) , Renderable {
     private var spriteSheet: BufferedImage = ImageIO.read(javaClass.classLoader.getResourceAsStream(spriteFileName))
-    private val frameRow = AtomicInteger(0)
     private val frameColumn = AtomicInteger(0)
+    private val frameRow = AtomicInteger(0)
 
     val ticksPerFrame = 4
-    private val maxColumns = 8
+    private val maxColumns = 4
     private val frameSize = 64
     private val currentTicks = AtomicInteger(0)
 
@@ -31,23 +37,23 @@ class Hero (
             when (directions.first()) {
 
                 KeyboardInputAdapter.KeyState.MOVE_UP -> {
-                    frameRow.set(0)
                     y -= movementPerUpdate
+                    frameRow.set(0)
                 }
 
                 KeyboardInputAdapter.KeyState.MOVE_RIGHT -> {
-                    frameRow.set(3)
                     x += movementPerUpdate
+                    frameRow.set(1)
                 }
 
                 KeyboardInputAdapter.KeyState.MOVE_DOWN -> {
-                    frameRow.set(2)
                     y += movementPerUpdate
+                    frameRow.set(2)
                 }
 
                 KeyboardInputAdapter.KeyState.MOVE_LEFT -> {
-                    frameRow.set(1)
                     x -= movementPerUpdate
+                    frameRow.set(3)
                 }
 
                 else -> {

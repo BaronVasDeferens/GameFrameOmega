@@ -26,7 +26,10 @@ class MainBrain() {
     // private val playerSprite = Sprite(50, 100, "sprite1.png")
 //    private val mouseSprite = Mouse(100, 100, "mouse.png")
 //    private val mech = Mech(200, 200)
-    private val hero = Hero(64,64)
+    private val hero = PlayerTank(64,64)
+
+    private val robo = RobotDrone(400,400)
+    private val cpu = CpuClock(600,600)
 
     init {
 
@@ -81,6 +84,7 @@ class MainBrain() {
 //        mouseSprite.update()
 //        mech.update()
         hero.update()
+        robo.update()
 
 
         map.moveWindow(hero)
@@ -94,7 +98,7 @@ class MainBrain() {
         g.color = Color.BLACK
         g.fillRect(0, 0, width, height)
 
-        map.render(listOf(hero), g)
+        map.render(listOf(hero, robo, cpu), g)
 
 //        entities.forEach { entity ->
 //            g.color = entity.color
