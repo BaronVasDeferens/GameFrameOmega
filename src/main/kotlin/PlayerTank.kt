@@ -95,7 +95,6 @@ class PlayerTank(
                 coastingDeltaCurrent = 0
             }
 
-
             // Apply drift (if any)
             if (coastingDeltaCurrent > 0) {
 
@@ -104,10 +103,7 @@ class PlayerTank(
                     currentTicks.set(0)
                 }
 
-
                 val driftAmount = (coastingDeltaMax / coastingDeltaCurrent)
-
-                println("dir: $lastDirection delta: $coastingDeltaCurrent amt: $driftAmount")
 
                 when (lastDirection) {
 
@@ -136,16 +132,7 @@ class PlayerTank(
                     }
                 }
             }
-
-
-            // put mouse in "neutral" frame
-//            frameRow.set(2)
-//            frameColumn.set(1)
         }
-
-
-
-//        println("row: ${frameRow.get()} col: ${frameColumn.get()}")
     }
 
     override fun render(graphics2D: Graphics2D) {
