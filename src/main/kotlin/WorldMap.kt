@@ -1,8 +1,6 @@
 import java.awt.Color
 import java.awt.Graphics2D
-import java.awt.RenderingHints
 import java.awt.image.BufferedImage
-import java.nio.Buffer
 import javax.imageio.ImageIO
 import kotlin.random.Random
 
@@ -24,8 +22,8 @@ class WorldMap(
     val blockSize: Int,
     val columns: Int,
     val rows: Int,
-    val windowWidth: Int = 500,
-    val windowHeight: Int = 500,
+    val windowWidth: Int,
+    val windowHeight: Int,
 ) {
 
     private val floorTileImage1: BufferedImage =
@@ -33,10 +31,14 @@ class WorldMap(
     private val floorTileImage2: BufferedImage =
         ImageIO.read(javaClass.classLoader.getResourceAsStream("floor_grey_center_square.png"))
 
-    private lateinit var floorImage: BufferedImage
+    private var floorImage: BufferedImage = BufferedImage(columns * blockSize, rows * blockSize, BufferedImage.TYPE_INT_ARGB)
 
     var windowX: Int = 0
     var windowY: Int = 0
+
+    // crudely define the "movement zone"
+    private val leftRightZoneSize = windowWidth / 3
+    private val upDownZoneSize = windowWidth / 3
 
     private val floorTiles: Array<Array<Block>> = Array(rows) { rowNum ->
         Array(columns) { colNum ->
@@ -52,7 +54,6 @@ class WorldMap(
     }
 
     init {
-        floorImage = BufferedImage(columns * blockSize, rows * blockSize, BufferedImage.TYPE_INT_ARGB)
         val graphics2d = floorImage.createGraphics()
         floorTiles.flatten().forEach { block ->
             block.render(graphics2d)
@@ -62,10 +63,7 @@ class WorldMap(
 
     fun moveWindow(hero: Player) {
 
-        if (hero.isMoving.get()) {
-            // crudely define the "movement zone"
-            val leftRightZoneSize = windowWidth / 3
-            val upDownZoneSize = windowWidth / 3
+        if (hero.isMoving.get() || hero.isCoasting.get()) {
 
             // RIGHT SCROLL
             val rightZoneX = windowWidth - leftRightZoneSize
@@ -94,7 +92,7 @@ class WorldMap(
 
             // DOWN SCROLL
             val downZoneX = windowHeight - upDownZoneSize
-            if (hero.y >= windowY + downZoneX) {
+            if (hero.y + hero.spriteSize >= windowY + downZoneX) {
                 if (windowY + hero.movementPerUpdate < floorImage.height - windowHeight) {
                     windowY += hero.movementPerUpdate
                     return
@@ -105,11 +103,6 @@ class WorldMap(
 
     fun render(entities: List<Renderable>, graphics2D: Graphics2D) {
 
-//        println(">>> window location: $windowX, $windowY")
-//
-//        val hero = entities[0] as Hero
-//        println(">>> player at: ${hero.x}, ${hero.y}")
-
         val floorCopy = BufferedImage(columns * blockSize, rows * blockSize, BufferedImage.TYPE_INT_ARGB)
         val copyGraphics = floorCopy.createGraphics()
         copyGraphics.drawImage(floorImage, 0, 0, null)
@@ -119,9 +112,13 @@ class WorldMap(
 
         // Draw window movement zones
         // TODO: test up/down zones
-//        copyGraphics.color = Color.RED
-//        copyGraphics.drawRect(windowX, windowY, windowWidth / 3, windowHeight ) // left
-//        copyGraphics.drawRect( windowX + (2 * windowWidth / 3), windowY, windowWidth /3, windowHeight ) // right
+        copyGraphics.color = Color.RED
+        copyGraphics.drawRect(windowX, windowY, windowWidth / 3, windowHeight ) // left
+        copyGraphics.drawRect( windowX + (2 * windowWidth / 3), windowY, windowWidth /3, windowHeight ) // right
+
+        copyGraphics.color = Color.BLUE
+        copyGraphics.drawRect(windowX + upDownZoneSize, windowY, upDownZoneSize, upDownZoneSize) // up
+        copyGraphics.drawRect( windowX + upDownZoneSize, windowY + (2 * upDownZoneSize), upDownZoneSize, upDownZoneSize ) // down
 
         copyGraphics.dispose()
         val window = floorCopy.getSubimage(windowX, windowY, windowWidth, windowHeight)

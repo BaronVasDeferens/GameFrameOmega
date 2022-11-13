@@ -1,9 +1,11 @@
-import KeyboardInputAdapter.KeyState.MOVE_UP
+import KeyboardInputAdapter.KeyState
+import KeyboardInputAdapter.KeyState.*
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import javax.imageio.ImageIO
+import kotlin.math.atan
 
 abstract class Player(
     open var x: Int,
@@ -12,13 +14,14 @@ abstract class Player(
     val spriteSize: Int = 64
 ) {
     val isMoving = AtomicBoolean(false)
+    val isCoasting = AtomicBoolean(false)
 }
 
 class PlayerTank(
     override var x: Int,
     override var y: Int,
-    override val movementPerUpdate: Int = 3,
-    spriteFileName: String = "tank_sprite_sheet.png"
+    override val movementPerUpdate: Int = 5,
+    spriteFileName: String = "tank_body_sprite_sheet.png"
 ) : Player(x, y, movementPerUpdate), Renderable {
     private var spriteSheet: BufferedImage = ImageIO.read(javaClass.classLoader.getResourceAsStream(spriteFileName))
     private val frameColumn = AtomicInteger(0)
@@ -29,12 +32,17 @@ class PlayerTank(
     private val frameSize = 64
     private val currentTicks = AtomicInteger(0)
 
-
     private var lastDirection = MOVE_UP
-    private val coastingDeltaMax = 10
+    private val coastingDeltaMax = 20
     private var coastingDeltaCurrent = 0
 
-    fun move(directions: Set<KeyboardInputAdapter.KeyState>) {
+    private var currentMouseX: Int = 0
+    private var currentMouseY: Int = 0
+    private var turretOrientation = 0.0
+    var opposite: Double = 0.0
+    var adjacent: Double = 0.0
+
+    fun move(directions: Set<KeyState>, mouseState: MouseState) {
 
         isMoving.set(directions.isNotEmpty())
 
@@ -50,17 +58,17 @@ class PlayerTank(
                     frameRow.set(0)
                 }
 
-                KeyboardInputAdapter.KeyState.MOVE_RIGHT -> {
+                MOVE_RIGHT -> {
                     x += movementPerUpdate
                     frameRow.set(1)
                 }
 
-                KeyboardInputAdapter.KeyState.MOVE_DOWN -> {
+                MOVE_DOWN -> {
                     y += movementPerUpdate
                     frameRow.set(2)
                 }
 
-                KeyboardInputAdapter.KeyState.MOVE_LEFT -> {
+                MOVE_LEFT -> {
                     x -= movementPerUpdate
                     frameRow.set(3)
                 }
@@ -72,6 +80,47 @@ class PlayerTank(
         } else {
 
         }
+
+        val centerX = x + 32
+        val centerY = y + 32
+
+        mouseState.mouseEvent?.apply {
+
+            val barrelLength = 32
+
+            currentMouseX = this.x
+            currentMouseY = this.y
+
+
+            // Quadrants I & II
+            if (currentMouseX < centerX) {
+
+                turretOrientation = if (currentMouseY < centerY) {
+                    println("Q2")
+                    opposite = (centerY - currentMouseY).toDouble()
+                    adjacent = (centerX - currentMouseX).toDouble()
+                    atan(opposite / adjacent) * (180 / Math.PI)
+
+                } else {
+                    println("Q3")
+                    90 + atan(opposite / adjacent) * (180 / Math.PI)
+                }
+            } else {
+
+                turretOrientation = if (currentMouseY < centerY) {
+                    println("Q1")
+                    180 + atan(opposite / adjacent) * (180 / Math.PI)
+                } else {
+                    println("Q4")
+                    270 + atan(opposite / adjacent) * (180 / Math.PI)
+                }
+            }
+
+//            println("($x $y) ($opposite, $adjacent) $turretOrientation ${mouseState.firing}")
+//            println("($centerX $centerY) ($currentMouseX, $currentMouseY) ${Math.floor(turretOrientation)}")
+
+        }
+
     }
 
     fun update() {
@@ -98,6 +147,7 @@ class PlayerTank(
             // Apply drift (if any)
             if (coastingDeltaCurrent > 0) {
 
+                isCoasting.set(true)
                 if (currentTicks.incrementAndGet() >= ticksPerFrame) {
                     frameColumn.set(frameColumn.incrementAndGet() % maxColumns)
                     currentTicks.set(0)
@@ -112,17 +162,17 @@ class PlayerTank(
                         frameRow.set(0)
                     }
 
-                    KeyboardInputAdapter.KeyState.MOVE_RIGHT -> {
+                    MOVE_RIGHT -> {
                         x += driftAmount
                         frameRow.set(1)
                     }
 
-                    KeyboardInputAdapter.KeyState.MOVE_DOWN -> {
+                    MOVE_DOWN -> {
                         y += driftAmount
                         frameRow.set(2)
                     }
 
-                    KeyboardInputAdapter.KeyState.MOVE_LEFT -> {
+                    MOVE_LEFT -> {
                         x -= driftAmount
                         frameRow.set(3)
                     }
@@ -131,14 +181,22 @@ class PlayerTank(
 
                     }
                 }
+            } else {
+                isCoasting.set(false)
             }
         }
     }
 
     override fun render(graphics2D: Graphics2D) {
+        // Find the correct sub-frame within the sprite sheet
         val targetFrame =
             spriteSheet.getSubimage(frameColumn.get() * frameSize, frameRow.get() * frameSize, frameSize, frameSize)
         graphics2D.drawImage(targetFrame, x, y, null)
+
+        // draw "turret"
+//        graphics2D.color = Color.RED
+//        graphics2D.drawLine(x + 32, y + 32, currentMouseX, currentMouseY)
+
     }
 
 }
