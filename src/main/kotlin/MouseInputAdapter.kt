@@ -34,6 +34,4 @@ class MouseInputAdapter(val flow: MutableStateFlow<MouseState>) : MouseInputAdap
     override fun mouseMoved(e: MouseEvent?) {
         flow.value = flow.value.copy(mouseEvent = e!!)
     }
-
-
 }

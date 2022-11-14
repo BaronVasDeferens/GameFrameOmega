@@ -40,10 +40,14 @@ class MainBrain() {
 //    private val mech = Mech(200, 200)
     private val hero = PlayerTank(64, 64)
 
-    private val robo = RobotDrone(400, 400)
-    private val cpu = CpuClock(600, 600)
+
+    private val renderables = mutableListOf<Renderable>()
 
     init {
+
+        renderables.add(RobotDrone(400, 400))
+        renderables.add(CpuClock(500, 600))
+        renderables.add(hero)
 
         val isPaused = AtomicBoolean(false)
 
@@ -81,31 +85,18 @@ class MainBrain() {
                     render()
                 }
                 sleep(5)
-                //sleep(1000 / 60);
             }
         }
 
     }
 
     private fun update() {
-        entities.forEach { entity ->
-            entity.update()
-        }
 
-        sprites.forEach { sprite ->
+        renderables.forEach { sprite ->
             sprite.update()
         }
 
-//        playerSprite.update()
-//        mouseSprite.update()
-//        mech.update()
-        hero.update()
-        robo.update()
-
-
         map.moveWindow(hero)
-
-
     }
 
     private fun render() {
@@ -114,22 +105,7 @@ class MainBrain() {
         g.color = Color.BLACK
         g.fillRect(0, 0, windowWidth, windowHeight)
 
-        map.render(listOf(hero, robo, cpu), g)
-
-//        entities.forEach { entity ->
-//            g.color = entity.color
-//            g.drawRect(entity.x, entity.y, 5, 5)
-//        }
-//
-//        sprites.forEach { sprite ->
-//            sprite.render(g)
-//        }
-
-//        playerSprite.render(g)
-//        mouseSprite.render(g)
-//        mech.render(g)
-//        hero.render(g)
-
+        map.render(renderables, g)
         g.dispose()
 
         imageState.value = image

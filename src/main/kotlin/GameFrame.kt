@@ -13,10 +13,10 @@ import javax.swing.event.MouseInputAdapter
 
 
 class GameFrame(
-    private val frameTitle: String = "TITLE OF GAME",
-    private val width: Int = 1000,
-    private val height: Int = 1000,
-    private val imageState: MutableStateFlow<BufferedImage>
+    frameTitle: String,
+    width: Int,
+    height: Int,
+    imageState: MutableStateFlow<BufferedImage>
 ) {
 
     private val frame = JFrame()

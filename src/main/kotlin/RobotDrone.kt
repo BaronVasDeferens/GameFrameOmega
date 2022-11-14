@@ -14,7 +14,7 @@ class RobotDrone(var x: Int,
     private val ticksPerUpdate: Int = 30
     private val currentTick = AtomicInteger(0)
 
-    fun update() {
+    override fun update() {
         val tick = currentTick.incrementAndGet()
         if (tick >= ticksPerUpdate) {
             currentTick.set(0)
@@ -29,9 +29,12 @@ class RobotDrone(var x: Int,
 
 }
 
-class CpuClock(val x: Int, val y: Int, spriteFileName: String = "processor.png"): Renderable{
+class CpuClock(val x: Int, val y: Int, spriteFileName: String = "processor.png"): Renderable {
 
     private var spriteSheet: BufferedImage = ImageIO.read(javaClass.classLoader.getResourceAsStream(spriteFileName))
+    override fun update() {
+
+    }
 
     override fun render(graphics2D: Graphics2D) {
         graphics2D.drawImage(spriteSheet, x, y, null)

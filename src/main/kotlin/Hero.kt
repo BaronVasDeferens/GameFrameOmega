@@ -57,7 +57,7 @@ class Hero (
         }
     }
 
-    fun update() {
+    override fun update() {
         if (isMoving.get()) {
             if (currentTicks.incrementAndGet() >= ticksPerFrame) {
                 frameColumn.set(frameColumn.incrementAndGet() % maxColumns)

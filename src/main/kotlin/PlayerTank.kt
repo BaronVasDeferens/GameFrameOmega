@@ -12,7 +12,7 @@ abstract class Player(
     open var y: Int,
     open val movementPerUpdate: Int,
     val spriteSize: Int = 64
-) {
+): Renderable {
     val isMoving = AtomicBoolean(false)
     val isCoasting = AtomicBoolean(false)
 }
@@ -20,9 +20,9 @@ abstract class Player(
 class PlayerTank(
     override var x: Int,
     override var y: Int,
-    override val movementPerUpdate: Int = 5,
+    override val movementPerUpdate: Int = 2,
     spriteFileName: String = "tank_body_sprite_sheet.png"
-) : Player(x, y, movementPerUpdate), Renderable {
+) : Player(x, y, movementPerUpdate) {
     private var spriteSheet: BufferedImage = ImageIO.read(javaClass.classLoader.getResourceAsStream(spriteFileName))
     private val frameColumn = AtomicInteger(0)
     private val frameRow = AtomicInteger(0)
@@ -33,7 +33,7 @@ class PlayerTank(
     private val currentTicks = AtomicInteger(0)
 
     private var lastDirection = MOVE_UP
-    private val coastingDeltaMax = 20
+    private val coastingDeltaMax = 10
     private var coastingDeltaCurrent = 0
 
     private var currentMouseX: Int = 0
@@ -41,6 +41,8 @@ class PlayerTank(
     private var turretOrientation = 0.0
     var opposite: Double = 0.0
     var adjacent: Double = 0.0
+
+    val projectiles = mutableListOf<Projectile>()
 
     fun move(directions: Set<KeyState>, mouseState: MouseState) {
 
@@ -81,6 +83,10 @@ class PlayerTank(
 
         }
 
+        if (mouseState.firing) {
+            println("PEW!")
+        }
+
         val centerX = x + 32
         val centerY = y + 32
 
@@ -96,22 +102,22 @@ class PlayerTank(
             if (currentMouseX < centerX) {
 
                 turretOrientation = if (currentMouseY < centerY) {
-                    println("Q2")
+//                    println("Q2")
                     opposite = (centerY - currentMouseY).toDouble()
                     adjacent = (centerX - currentMouseX).toDouble()
                     atan(opposite / adjacent) * (180 / Math.PI)
 
                 } else {
-                    println("Q3")
+//                    println("Q3")
                     90 + atan(opposite / adjacent) * (180 / Math.PI)
                 }
             } else {
 
                 turretOrientation = if (currentMouseY < centerY) {
-                    println("Q1")
+//                    println("Q1")
                     180 + atan(opposite / adjacent) * (180 / Math.PI)
                 } else {
-                    println("Q4")
+//                    println("Q4")
                     270 + atan(opposite / adjacent) * (180 / Math.PI)
                 }
             }
@@ -123,7 +129,7 @@ class PlayerTank(
 
     }
 
-    fun update() {
+    override fun update() {
         if (isMoving.get()) {
 
             coastingDeltaCurrent = 1
@@ -196,6 +202,16 @@ class PlayerTank(
         // draw "turret"
 //        graphics2D.color = Color.RED
 //        graphics2D.drawLine(x + 32, y + 32, currentMouseX, currentMouseY)
+
+    }
+
+}
+
+class Projectile (val genesisX: Int, val genesisY: Int, val theta: Float, val speedPerTick: Int, val image: BufferedImage): Renderable {
+    override fun update() {
+    }
+
+    override fun render(graphics2D: Graphics2D) {
 
     }
 

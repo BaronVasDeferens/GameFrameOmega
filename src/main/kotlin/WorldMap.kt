@@ -6,12 +6,16 @@ import kotlin.random.Random
 
 
 class Block(
-    val blockSize: Int,
-    val x: Int,
-    val y: Int,
-    val image: BufferedImage,
+    private val blockSize: Int,
+    private val x: Int,
+    private val y: Int,
+    private val image: BufferedImage,
     val impassable: Boolean = true
 ) : Renderable {
+    override fun update() {
+
+    }
+
     override fun render(graphics2D: Graphics2D) {
         graphics2D.drawImage(image, x * blockSize, y * blockSize, null)
     }
@@ -19,9 +23,9 @@ class Block(
 }
 
 class WorldMap(
-    val blockSize: Int,
-    val columns: Int,
-    val rows: Int,
+    private val blockSize: Int,
+    private val columns: Int,
+    private val rows: Int,
     val windowWidth: Int,
     val windowHeight: Int,
 ) {
@@ -39,6 +43,8 @@ class WorldMap(
     // crudely define the "movement zone"
     private val leftRightZoneSize = windowWidth / 3
     private val upDownZoneSize = windowWidth / 3
+
+    private val drawDebugArtifacts = false
 
     private val floorTiles: Array<Array<Block>> = Array(rows) { rowNum ->
         Array(columns) { colNum ->
@@ -110,15 +116,21 @@ class WorldMap(
             entity.render(copyGraphics)
         }
 
-        // Draw window movement zones
-        // TODO: test up/down zones
-        copyGraphics.color = Color.RED
-        copyGraphics.drawRect(windowX, windowY, windowWidth / 3, windowHeight ) // left
-        copyGraphics.drawRect( windowX + (2 * windowWidth / 3), windowY, windowWidth /3, windowHeight ) // right
+        if (drawDebugArtifacts) {
+            // Draw window movement zones
+            copyGraphics.color = Color.RED
+            copyGraphics.drawRect(windowX, windowY, leftRightZoneSize, windowHeight) // left
+            copyGraphics.drawRect(windowX + (2 * leftRightZoneSize), windowY, leftRightZoneSize, windowHeight) // right
 
-        copyGraphics.color = Color.BLUE
-        copyGraphics.drawRect(windowX + upDownZoneSize, windowY, upDownZoneSize, upDownZoneSize) // up
-        copyGraphics.drawRect( windowX + upDownZoneSize, windowY + (2 * upDownZoneSize), upDownZoneSize, upDownZoneSize ) // down
+            copyGraphics.color = Color.BLUE
+            copyGraphics.drawRect(windowX + upDownZoneSize, windowY, upDownZoneSize, upDownZoneSize) // up
+            copyGraphics.drawRect(
+                windowX + upDownZoneSize,
+                windowY + (2 * upDownZoneSize),
+                upDownZoneSize,
+                upDownZoneSize
+            ) // down
+        }
 
         copyGraphics.dispose()
         val window = floorCopy.getSubimage(windowX, windowY, windowWidth, windowHeight)
