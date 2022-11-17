@@ -1,7 +1,5 @@
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.awt.event.MouseEvent
-import java.awt.event.MouseListener
-import java.awt.event.MouseMotionListener
 import javax.swing.event.MouseInputAdapter
 
 
@@ -29,6 +27,7 @@ class MouseInputAdapter(val flow: MutableStateFlow<MouseState>) : MouseInputAdap
     }
 
     override fun mouseDragged(e: MouseEvent?) {
+        flow.value = flow.value.copy(mouseEvent = e!!)
     }
 
     override fun mouseMoved(e: MouseEvent?) {

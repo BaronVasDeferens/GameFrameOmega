@@ -13,7 +13,6 @@ data class Sprite(var x: Int, var y: Int, val imageFileName: String) {
         return random.nextInt(max) + min
     }
 
-
     private var image: BufferedImage = ImageIO.read(javaClass.classLoader.getResourceAsStream(imageFileName))
 
     // sprite1.png is 92x74px per frame

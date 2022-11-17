@@ -1,18 +1,21 @@
 import KeyboardInputAdapter.KeyState
 import KeyboardInputAdapter.KeyState.*
+import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import javax.imageio.ImageIO
 import kotlin.math.atan
+import kotlin.math.cos
+import kotlin.math.sin
 
 abstract class Player(
     open var x: Int,
     open var y: Int,
     open val movementPerUpdate: Int,
     val spriteSize: Int = 64
-): Renderable {
+) : Renderable {
     val isMoving = AtomicBoolean(false)
     val isCoasting = AtomicBoolean(false)
 }
@@ -33,16 +36,19 @@ class PlayerTank(
     private val currentTicks = AtomicInteger(0)
 
     private var lastDirection = MOVE_UP
-    private val coastingDeltaMax = 10
+    private val coastingDeltaMax = movementPerUpdate * 4
     private var coastingDeltaCurrent = 0
 
     private var currentMouseX: Int = 0
     private var currentMouseY: Int = 0
     private var turretOrientation = 0.0
-    var opposite: Double = 0.0
-    var adjacent: Double = 0.0
+    private val turretLength = 20
+    private var opposite: Double = 0.0
+    private var adjacent: Double = 0.0
 
     val projectiles = mutableListOf<Projectile>()
+
+
 
     fun move(directions: Set<KeyState>, mouseState: MouseState) {
 
@@ -83,50 +89,50 @@ class PlayerTank(
 
         }
 
-        if (mouseState.firing) {
-            println("PEW!")
-        }
-
-        val centerX = x + 32
-        val centerY = y + 32
+        val centerX = x + frameSize / 2
+        val centerY = y + frameSize / 2
 
         mouseState.mouseEvent?.apply {
-
-            val barrelLength = 32
 
             currentMouseX = this.x
             currentMouseY = this.y
 
+            opposite = (centerY - currentMouseY).toDouble()
+            adjacent = (centerX - currentMouseX).toDouble()
 
             // Quadrants I & II
-            if (currentMouseX < centerX) {
+            if (currentMouseX > centerX) {
 
                 turretOrientation = if (currentMouseY < centerY) {
 //                    println("Q2")
-                    opposite = (centerY - currentMouseY).toDouble()
-                    adjacent = (centerX - currentMouseX).toDouble()
-                    atan(opposite / adjacent) * (180 / Math.PI)
-
+                    atan(opposite / adjacent)
                 } else {
 //                    println("Q3")
-                    90 + atan(opposite / adjacent) * (180 / Math.PI)
+                    atan(opposite / adjacent)
                 }
             } else {
-
                 turretOrientation = if (currentMouseY < centerY) {
-//                    println("Q1")
-                    180 + atan(opposite / adjacent) * (180 / Math.PI)
+                    // println("Q1")
+                    Math.PI + atan(opposite / adjacent)
                 } else {
 //                    println("Q4")
-                    270 + atan(opposite / adjacent) * (180 / Math.PI)
+                    Math.PI + atan(opposite / adjacent)
                 }
             }
-
-//            println("($x $y) ($opposite, $adjacent) $turretOrientation ${mouseState.firing}")
-//            println("($centerX $centerY) ($currentMouseX, $currentMouseY) ${Math.floor(turretOrientation)}")
-
         }
 
+        // Handle FIRING
+        if (mouseState.firing) {
+            projectiles.add(
+                Projectile(
+                    x + (frameSize / 2),
+                    y + (frameSize / 2),
+                    turretOrientation.toFloat(),
+                    20,
+                    ImageIO.read(javaClass.classLoader.getResourceAsStream("projectile_16x16.png"))
+                )
+            )
+        }
     }
 
     override fun update() {
@@ -191,28 +197,67 @@ class PlayerTank(
                 isCoasting.set(false)
             }
         }
+
+        projectiles.forEach {
+            it.update()
+        }
     }
 
     override fun render(graphics2D: Graphics2D) {
-        // Find the correct sub-frame within the sprite sheet
+        // Find the correct frame within the sprite sheet
         val targetFrame =
             spriteSheet.getSubimage(frameColumn.get() * frameSize, frameRow.get() * frameSize, frameSize, frameSize)
         graphics2D.drawImage(targetFrame, x, y, null)
 
         // draw "turret"
-//        graphics2D.color = Color.RED
-//        graphics2D.drawLine(x + 32, y + 32, currentMouseX, currentMouseY)
+        graphics2D.color = Color.BLACK
+        val deltaX = sin(turretOrientation) * turretLength
+        val deltaY = cos(turretOrientation) * turretLength
+        graphics2D.drawLine(x + (frameSize / 2), y + (frameSize / 2), x + deltaX.toInt(), y + deltaY.toInt())
 
+        projectiles.forEach {
+            it.render(graphics2D)
+        }
     }
-
 }
 
-class Projectile (val genesisX: Int, val genesisY: Int, val theta: Float, val speedPerTick: Int, val image: BufferedImage): Renderable {
+class Projectile(
+    val genesisX: Int,
+    val genesisY: Int,
+    val thetaAngle: Float,
+    val speedPerTick: Int,
+    val image: BufferedImage
+) : Renderable {
+
+    private var x = genesisX
+    private var y = genesisY
+
+    private var deltaX = 0
+    private var deltaY = 0
+
+    var isValid: Boolean = true
+
+    init {
+        deltaX = (cos(thetaAngle.toDouble()) * speedPerTick).toInt()
+        deltaY = (sin(thetaAngle.toDouble()) * speedPerTick).toInt()
+    }
+
     override fun update() {
+        x += deltaX
+        y += deltaY
+    }
+
+    /**
+     * Updates the projectiles validity.
+     * Returns true if the projectile is still valid, false otherwise
+     */
+    fun checkValidity(minX: Int, minY: Int, maxX: Int, maxY: Int): Boolean {
+        isValid = (x > minX) && (x < maxX) && (y > minY) && (y < maxY)
+        return isValid
     }
 
     override fun render(graphics2D: Graphics2D) {
-
+        graphics2D.drawImage(image, x - (image.width / 2), y - (image.width / 2), null)
     }
 
 }
