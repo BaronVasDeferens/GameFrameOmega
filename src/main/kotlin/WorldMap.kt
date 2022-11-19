@@ -123,10 +123,7 @@ class WorldMap(
             hero.y
         }
 
-        println("${hero.x} ${hero.y} -> $posX $posY")
-
         hero.setWindowPosition(posX, posY)
-
     }
 
     fun render(entities: List<Renderable>, graphics2D: Graphics2D) {

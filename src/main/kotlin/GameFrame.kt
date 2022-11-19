@@ -2,10 +2,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import java.awt.Canvas
-import java.awt.Dimension
-import java.awt.Graphics2D
-import java.awt.GraphicsEnvironment
+import java.awt.*
 import java.awt.event.KeyListener
 import java.awt.image.BufferedImage
 import javax.swing.JFrame
@@ -25,6 +22,8 @@ class GameFrame(
     private var backgroundImage: BufferedImage? = null
 
 
+    private val hideMouseCursor = true
+
     init {
 
         val env = GraphicsEnvironment.getLocalGraphicsEnvironment()
@@ -42,6 +41,15 @@ class GameFrame(
         frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         frame.pack()
 
+        if (hideMouseCursor) {
+            frame.cursor = frame.toolkit.createCustomCursor(
+                BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB),
+                Point(),
+                null
+            )
+        }
+
+        frame.setLocation(750, 250)
         canvas.requestFocus()
 
         imageState.onEach { image ->

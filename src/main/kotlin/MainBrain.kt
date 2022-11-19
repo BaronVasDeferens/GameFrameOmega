@@ -32,15 +32,7 @@ class MainBrain() {
     private val mouseInputState = MutableStateFlow(MouseState())
     private val mouseListener = MouseInputAdapter(mouseInputState)
 
-    private val entities = mutableListOf<Entity>()
-    private val sprites = mutableListOf<Sprite>()
-
-    // private val playerSprite = Sprite(50, 100, "sprite1.png")
-//    private val mouseSprite = Mouse(100, 100, "mouse.png")
-//    private val mech = Mech(200, 200)
     private val hero = PlayerTank(64, 64)
-
-
     private val renderables = mutableListOf<Renderable>()
 
     init {
@@ -59,15 +51,7 @@ class MainBrain() {
 
         while (true) {
 
-            // TODO: process input
-//            playerSprite.move(keyInputState.value)
-//            mouseSprite.move(keyInputState.value)
-//            mech.move(keyInputState.value)
-            hero.move(keyInputState.value, mouseInputState.value)
-
-
             keyInputState.value.forEach { state ->
-
                 when (state) {
 
                     KeyboardInputAdapter.KeyState.PAUSE -> {
@@ -77,19 +61,25 @@ class MainBrain() {
                     KeyboardInputAdapter.KeyState.QUIT -> {
                         exitProcess(0)
                     }
+
+                    else -> {
+
+                    }
                 }
             }
 
             if (!isPaused.get()) {
+                hero.move(keyInputState.value, mouseInputState.value)
                 update()
                 render()
+            } else {
+                println("PAUSED!")
             }
             sleep(5)
         }
     }
 
     private fun update() {
-
         renderables.forEach { sprite ->
             sprite.update()
         }
@@ -100,8 +90,7 @@ class MainBrain() {
     private fun render() {
         val image = BufferedImage(windowWidth, windowHeight, BufferedImage.TYPE_INT_ARGB)
         val g = image.graphics as Graphics2D
-        g.color = Color.BLACK
-        g.fillRect(0, 0, windowWidth, windowHeight)
+        //g.clearRect(0, 0, windowWidth, windowHeight)
 
         map.render(renderables, g)
         g.dispose()

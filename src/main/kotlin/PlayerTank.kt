@@ -90,9 +90,6 @@ class PlayerTank(
 
         }
 
-        val centerX = x + frameSize / 2
-        val centerY = y + frameSize / 2
-
         mouseState.mouseEvent?.apply {
 
             currentMouseX = this.x
@@ -222,7 +219,7 @@ class PlayerTank(
         graphics2D.drawLine(x + (frameSize / 2), y + (frameSize / 2), x + (frameSize / 2) + deltaX, y + (frameSize / 2) + deltaY)
 
         // Draw circle around tank
-        graphics2D.drawArc(x, y , frameSize, frameSize, 0, 360)
+//        graphics2D.drawArc(x, y , frameSize, frameSize, 0, 360)
 
         projectiles.forEach {
             it.render(graphics2D)
