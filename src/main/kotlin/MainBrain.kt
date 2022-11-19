@@ -1,10 +1,8 @@
 import kotlinx.coroutines.flow.MutableStateFlow
-import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import java.lang.Thread.sleep
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
@@ -32,7 +30,7 @@ class MainBrain() {
     private val mouseInputState = MutableStateFlow(MouseState())
     private val mouseListener = MouseInputAdapter(mouseInputState)
 
-    private val hero = PlayerTank(64, 64)
+    private val hero = PlayerTank(100, 100)
     private val renderables = mutableListOf<Renderable>()
 
     init {
