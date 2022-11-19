@@ -22,6 +22,10 @@ class RobotDrone(var x: Int,
         }
     }
 
+    override fun setWindowPosition(posX: Int, posY: Int) {
+
+    }
+
     override fun render(graphics2D: Graphics2D) {
         val subImage = spriteSheet.getSubimage(spriteSize * currentSpriteIndex.get(), 0, spriteSize, spriteSize)
         graphics2D.drawImage(subImage, x, y, null)
@@ -33,6 +37,10 @@ class CpuClock(val x: Int, val y: Int, spriteFileName: String = "processor.png")
 
     private var spriteSheet: BufferedImage = ImageIO.read(javaClass.classLoader.getResourceAsStream(spriteFileName))
     override fun update() {
+
+    }
+
+    override fun setWindowPosition(posX: Int, posY: Int) {
 
     }
 

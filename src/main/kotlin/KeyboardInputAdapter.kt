@@ -21,7 +21,7 @@ class KeyboardInputAdapter(private val keyState: MutableStateFlow<Set<KeyState>>
         e?.apply {
             when (e.keyCode) {
                 KeyEvent.VK_SPACE -> {
-                    // keyState.value = keyState.value.plus(KeyState.PAUSE)
+                    keyState.value = keyState.value.plus(KeyState.PAUSE)
                 }
 
                 KeyEvent.VK_ESCAPE -> {
@@ -54,6 +54,10 @@ class KeyboardInputAdapter(private val keyState: MutableStateFlow<Set<KeyState>>
     override fun keyReleased(e: KeyEvent?) {
         e?.apply {
             when (e.keyCode) {
+
+                KeyEvent.VK_SPACE -> {
+                    keyState.value = keyState.value.minus(KeyState.PAUSE)
+                }
 
                 KeyEvent.VK_A -> {
                     keyState.value = keyState.value.minus(KeyState.MOVE_LEFT)

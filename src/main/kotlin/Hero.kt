@@ -75,6 +75,10 @@ class Hero (
 //        println("row: ${frameRow.get()} col: ${frameColumn.get()}")
     }
 
+    override fun setWindowPosition(posX: Int, posY: Int) {
+
+    }
+
     override fun render(graphics2D: Graphics2D) {
         val targetFrame = spriteSheet.getSubimage(frameColumn.get() * frameSize, frameRow.get() * frameSize, frameSize, frameSize)
         graphics2D.drawImage(targetFrame, x, y, null)

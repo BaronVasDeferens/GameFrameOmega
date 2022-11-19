@@ -16,6 +16,10 @@ class Block(
 
     }
 
+    override fun setWindowPosition(posX: Int, posY: Int) {
+
+    }
+
     override fun render(graphics2D: Graphics2D) {
         graphics2D.drawImage(image, x * blockSize, y * blockSize, null)
     }
@@ -105,6 +109,24 @@ class WorldMap(
                 }
             }
         }
+
+        // Update Tank's internal notion of its position within the window
+        val posX = if (hero.x > windowX) {
+            hero.x - windowX
+        } else {
+            hero.x
+        }
+
+        val posY = if(hero.y > windowY) {
+            hero.y - windowY
+        } else {
+            hero.y
+        }
+
+        println("${hero.x} ${hero.y} -> $posX $posY")
+
+        hero.setWindowPosition(posX, posY)
+
     }
 
     fun render(entities: List<Renderable>, graphics2D: Graphics2D) {
