@@ -56,38 +56,36 @@ class MainBrain() {
         gameFrame.setMouseAdapter(mouseListener)
         gameFrame.showFrame()
 
-        thread {
-            while (true) {
 
-                // TODO: process input
+        while (true) {
+
+            // TODO: process input
 //            playerSprite.move(keyInputState.value)
 //            mouseSprite.move(keyInputState.value)
 //            mech.move(keyInputState.value)
-                hero.move(keyInputState.value, mouseInputState.value)
+            hero.move(keyInputState.value, mouseInputState.value)
 
 
-                keyInputState.value.forEach { state ->
+            keyInputState.value.forEach { state ->
 
-                    when (state) {
+                when (state) {
 
-                        KeyboardInputAdapter.KeyState.PAUSE -> {
-                            isPaused.set(!isPaused.get())
-                        }
+                    KeyboardInputAdapter.KeyState.PAUSE -> {
+                        isPaused.set(!isPaused.get())
+                    }
 
-                        KeyboardInputAdapter.KeyState.QUIT -> {
-                            exitProcess(0)
-                        }
+                    KeyboardInputAdapter.KeyState.QUIT -> {
+                        exitProcess(0)
                     }
                 }
-
-                if (!isPaused.get()) {
-                    update()
-                    render()
-                }
-                sleep(5)
             }
-        }
 
+            if (!isPaused.get()) {
+                update()
+                render()
+            }
+            sleep(5)
+        }
     }
 
     private fun update() {

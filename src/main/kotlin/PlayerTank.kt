@@ -42,13 +42,11 @@ class PlayerTank(
     private var currentMouseX: Int = 0
     private var currentMouseY: Int = 0
     private var turretOrientation = 0.0
-    private val turretLength = 20
+    private val turretLength = 40
     private var opposite: Double = 0.0
     private var adjacent: Double = 0.0
 
     val projectiles = mutableListOf<Projectile>()
-
-
 
     fun move(directions: Set<KeyState>, mouseState: MouseState) {
 
@@ -211,9 +209,12 @@ class PlayerTank(
 
         // draw "turret"
         graphics2D.color = Color.BLACK
-        val deltaX = sin(turretOrientation) * turretLength
-        val deltaY = cos(turretOrientation) * turretLength
-        graphics2D.drawLine(x + (frameSize / 2), y + (frameSize / 2), x + deltaX.toInt(), y + deltaY.toInt())
+        val deltaX = (cos(turretOrientation) * turretLength).toInt()
+        val deltaY = (sin(turretOrientation) * turretLength).toInt()
+        graphics2D.drawLine(x + (frameSize / 2), y + (frameSize / 2), x + (frameSize / 2) + deltaX, y + (frameSize / 2) + deltaY)
+
+        // Draw circle around tank
+        graphics2D.drawArc(x, y , frameSize, frameSize, 0, 360)
 
         projectiles.forEach {
             it.render(graphics2D)
