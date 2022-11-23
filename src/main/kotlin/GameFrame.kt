@@ -37,9 +37,13 @@ class GameFrame(
 
         canvas.size = Dimension(width, height)
 
+
         frame.add(canvas)
+
         frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         frame.pack()
+
+        canvas.createBufferStrategy(2)
 
         if (hideMouseCursor) {
             frame.cursor = frame.toolkit.createCustomCursor(

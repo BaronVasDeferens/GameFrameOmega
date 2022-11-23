@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.10"
+    kotlin("jvm") version "1.6.0"
 }
 
 group = "me.skot"
@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     testImplementation(kotlin("test-junit"))
     implementation(kotlin("stdlib-jdk8"))
 }
