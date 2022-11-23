@@ -42,7 +42,7 @@ class GameScreen(val game: Drop) : Screen {
     init {
         // load the images for the droplet & bucket, 64x64 pixels each
         dropImage = Texture(Gdx.files.internal("fire64.png"))
-        bucketImage = Texture(Gdx.files.internal("floor_grey_basic.png"))
+        bucketImage = Texture(Gdx.files.internal("floorGreyTest.png"))
 
         // load the drop sound effect and the rain background music
 //        dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"))
@@ -116,7 +116,7 @@ class GameScreen(val game: Drop) : Screen {
             bucket.x = 800f-64f
 
         // check if we need to create a new raindrop
-        if (TimeUtils.nanoTime() - lastDropTime > 1_000_000_000L)
+        if (TimeUtils.nanoTime() - lastDropTime > 1_000_000L)
             spawnRaindrop()
 
         // move the raindrops, remove any that are beneath the bottom edge of the
@@ -125,7 +125,7 @@ class GameScreen(val game: Drop) : Screen {
         var iter = raindrops.iterator()
         while (iter.hasNext()) {
             var raindrop = iter.next()
-            raindrop.y -= 200 * Gdx.graphics.getDeltaTime()
+            raindrop.y -= 300 * Gdx.graphics.getDeltaTime()
             if (raindrop.y + 64 < 0)
                 iter.remove()
 

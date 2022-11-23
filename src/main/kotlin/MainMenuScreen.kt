@@ -12,7 +12,7 @@ class MainMenuScreen(private val game: Drop):Screen {
     }
 
     override fun render(delta: Float) {
-        ScreenUtils.clear(0f, 0f, 0.2f, 1f);
+        ScreenUtils.clear(.9f, 0f, 0.2f, 1f);
 
         camera.update();
         game.batch.projectionMatrix = camera.combined;
