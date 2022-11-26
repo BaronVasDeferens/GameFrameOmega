@@ -1,38 +1,24 @@
 package advanced
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.graphics.Texture
-import javafx.scene.input.KeyCode
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.lang.Thread.sleep
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
-import kotlin.random.Random
+import java.util.concurrent.atomic.AtomicBoolean
 
 enum class GamePhase {
     IDLE,
     IN_PLAY,
-    PAUSED
+    PAUSED,
+    TEARDOWN
 }
 
-abstract class Entity(open val image: Texture, open val x: Int = 0, open val y: Int = 0) {
-    open fun update(): Entity {
-        return this
-    }
 
-    open fun render() {}
-}
-
-data class Robot(override val image: Texture, override val x: Int, override val y: Int) : Entity(image) {
-    override fun update(): Entity {
-        return this.copy(
-            x = x + (Random.nextInt(4) - Random.nextInt(4)),
-            y = y + (Random.nextInt(4) - Random.nextInt(4))
-        )
-    }
-}
 
 data class GameState(
     val gamePhase: GamePhase,
@@ -49,26 +35,38 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
 
     val gameStateFlow = MutableStateFlow(GameState(gamePhase = GamePhase.IN_PLAY))
 
-    private val updateJab: ScheduledFuture<*> = Executors.newSingleThreadScheduledExecutor().schedule({
-        while (true) {
+    private val continueRunning = AtomicBoolean(true)
+
+    private val updateJob: ScheduledFuture<*> = Executors.newSingleThreadScheduledExecutor().schedule({
+        while (continueRunning.get()) {
             val state = gameStateFlow.value
-            gameStateFlow.value = state.updateState()
+
+            if (state.gamePhase == GamePhase.TEARDOWN) {
+                continueRunning.set(false)
+                destroy()
+            } else {
+                gameStateFlow.value = state.updateState()
+            }
             sleep(10)
         }
     }, 10, TimeUnit.MILLISECONDS)
 
 
     fun destroy() {
-        updateJab.cancel(true)
-        gameStateFlow.value = GameState(GamePhase.IDLE)
+        updateJob.cancel(true)
+        //gameStateFlow.value = GameState(GamePhase.IDLE)
     }
 
     override fun keyDown(keycode: Int): Boolean {
         val state = gameStateFlow.value
 
-        when {
-            (state.gamePhase == GamePhase.IDLE) && (keycode == KeyCode.ESCAPE.code) -> {
+        println(">>> key pressed: $keycode")
 
+        when {
+            (keycode == Input.Keys.ESCAPE) -> {
+                gameStateFlow.value = gameStateFlow.value.copy(
+                    gamePhase = GamePhase.TEARDOWN,
+                    entities = listOf())
             }
 
             else -> {
@@ -91,7 +89,7 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
         val state = gameStateFlow.value
         when (state.gamePhase) {
             GamePhase.IN_PLAY -> {
-                val robot = Robot(Texture(Gdx.files.internal("fire64.png")), state.mouseX, state.mouseY)
+                val robot = Robot(Texture(Gdx.files.internal("robot_basic.png")), state.mouseX, state.mouseY)
                 gameStateFlow.value = state.copy(entities = state.entities.plus(robot))
                 println(">>> total entities: ${gameStateFlow.value.entities.size}")
             }

@@ -76,10 +76,15 @@ class GameScreen(val drop: Drop) : Screen {
 
         val state = gameStateManager.gameStateFlow.value
 
+        if (state.gamePhase == GamePhase.TEARDOWN) {
+            gameStateManager.destroy()
+            dispose()
+        }
+
         // clear the screen with a dark blue color. The arguments to clear
         //    are the RGB and alpha component in the range [0,1] of the color to
         //    be used to clear the screen.
-        ScreenUtils.clear(0.0f, 0.0f, 0.2f, 1.0f)
+        ScreenUtils.clear(1.0f, 1.0f, 1.0f, 1.0f)
 
         // generally good practice to update the camera's matrices once per frame
         camera.update()
@@ -99,7 +104,7 @@ class GameScreen(val drop: Drop) : Screen {
 //        }
 
         state.entities.forEach { entity ->
-            drop.batch.draw(entity.image, entity.x.toFloat(), entity.y.toFloat())
+            drop.batch.draw(entity.image, entity.x.toFloat(), drop.height - entity.y.toFloat())
         }
 
         drop.batch.end()
