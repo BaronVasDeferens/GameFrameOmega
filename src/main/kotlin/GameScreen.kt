@@ -1,6 +1,4 @@
 
-import com.badlogic.gdx.audio.Music
-import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
@@ -13,7 +11,7 @@ import com.badlogic.gdx.utils.Array
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 
-class GameScreen(val game: Drop) : Screen {
+class GameScreen(val drop: Drop) : Screen {
 
     private var dropImage: Texture
     private var bucketImage: Texture
@@ -51,7 +49,7 @@ class GameScreen(val game: Drop) : Screen {
 
         // create the camera and the SpriteBatch
         camera = OrthographicCamera()
-        camera.setToOrtho(false, 800f, 480f)
+        camera.setToOrtho(false, drop.width.toFloat(), drop.height.toFloat())
 
         // create a Rectangle to logically represent the bucket
         bucket = Rectangle()
@@ -80,17 +78,17 @@ class GameScreen(val game: Drop) : Screen {
 
         // tell the SpriteBatch to render in the coordinate system specified by the
         //    camera.
-        game.batch.setProjectionMatrix(camera.combined)
+        drop.batch.setProjectionMatrix(camera.combined)
 
         // begin a new batch and draw the bucket and all drops
-        game.batch.begin()
-        game.font.draw(game.batch, "Drops Collected: " + dropsGathered, 0f, 480f)
-        game.batch.draw(bucketImage, bucket.x, bucket.y,
+        drop.batch.begin()
+        drop.font.draw(drop.batch, "Drops Collected: " + dropsGathered, 0f, 480f)
+        drop.batch.draw(bucketImage, bucket.x, bucket.y,
             bucket.width, bucket.height)
         for (raindrop in raindrops) {
-            game.batch.draw(dropImage, raindrop.x, raindrop.y)
+            drop.batch.draw(dropImage, raindrop.x, raindrop.y)
         }
-        game.batch.end()
+        drop.batch.end()
 
         // process user input
         if (Gdx.input.isTouched()) {

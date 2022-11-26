@@ -3,28 +3,28 @@ import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.utils.ScreenUtils
 
-class MainMenuScreen(private val game: Drop):Screen {
+class MainMenuScreen(private val drop: Drop):Screen {
 
     private var camera: OrthographicCamera = OrthographicCamera()
 
     init {
-        camera.setToOrtho(false, 800f, 480f)
+        camera.setToOrtho(false, drop.width.toFloat(), drop.height.toFloat())
     }
 
     override fun render(delta: Float) {
         ScreenUtils.clear(.9f, 0f, 0.2f, 1f);
 
         camera.update();
-        game.batch.projectionMatrix = camera.combined;
+        drop.batch.projectionMatrix = camera.combined;
 
-        game.batch.begin();
-        game.font.draw(game.batch, "Welcome to Drop!!! ", 100f, 150f);
-        game.font.draw(game.batch, "Tap anywhere to begin!", 100f, 100f);
-        game.batch.end();
+        drop.batch.begin();
+        drop.font.draw(drop.batch, "Welcome to Drop!!! ", 100f, 150f)
+        drop.font.draw(drop.batch, "Tap anywhere to begin!", 100f, 100f)
+        drop.batch.end()
 
         if (Gdx.input.isTouched) {
-            game.screen = GameScreen(game);
-            dispose();
+            drop.screen = GameScreen(drop)
+            dispose()
         }
     }
 

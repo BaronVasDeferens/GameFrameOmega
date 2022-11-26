@@ -4,7 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 
-class Drop : Game() {
+class Drop(val width: Int, val height: Int) : Game() {
 
     public lateinit var batch: SpriteBatch
     public lateinit var font: BitmapFont
