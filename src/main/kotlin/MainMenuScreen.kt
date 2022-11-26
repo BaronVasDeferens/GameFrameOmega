@@ -1,3 +1,5 @@
+import advanced.Drop
+import advanced.GameScreen
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -18,7 +20,7 @@ class MainMenuScreen(private val drop: Drop):Screen {
         drop.batch.projectionMatrix = camera.combined;
 
         drop.batch.begin();
-        drop.font.draw(drop.batch, "Welcome to Drop!!! ", 100f, 150f)
+        drop.font.draw(drop.batch, "Welcome to advanced.Drop!!! ", 100f, 150f)
         drop.font.draw(drop.batch, "Tap anywhere to begin!", 100f, 100f)
         drop.batch.end()
 

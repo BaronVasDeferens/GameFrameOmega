@@ -12,6 +12,9 @@ repositories {
 }
 
 dependencies {
+
+    gradleApi()
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     testImplementation(kotlin("test-junit"))
     implementation(kotlin("stdlib-jdk8"))
@@ -20,6 +23,7 @@ dependencies {
     val gdxVersion = "1.11.0"
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
     implementation("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
+
 }
 
 tasks.test {
