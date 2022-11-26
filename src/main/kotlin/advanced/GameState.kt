@@ -10,6 +10,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.random.Random
 
 enum class GamePhase {
     IDLE,
@@ -33,7 +34,25 @@ data class GameState(
 
 class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputProcessor {
 
-    val gameStateFlow = MutableStateFlow(GameState(gamePhase = GamePhase.IN_PLAY))
+    enum class ImageType {
+        ROBOT
+    }
+
+    private val textureMap = ImageType.values().associateWith {
+        when (it) {
+            ImageType.ROBOT -> {
+                Texture(Gdx.files.internal("robot_basic.png"))
+            }
+        }
+    }
+
+    val gameStateFlow = MutableStateFlow(
+        GameState(
+            gamePhase = GamePhase.IN_PLAY,
+            entities =  (1..100)
+                .map {
+                Robot(textureMap[ImageType.ROBOT]!!, Random.nextInt(width), Random.nextInt(height))
+            }.toList()))
 
     private val continueRunning = AtomicBoolean(true)
 
