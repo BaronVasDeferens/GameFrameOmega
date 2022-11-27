@@ -2,13 +2,10 @@ package advanced
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.Screen
-import com.badlogic.gdx.utils.Array
 import com.badlogic.gdx.utils.ScreenUtils
-import com.badlogic.gdx.utils.TimeUtils
 
 class GameScreen(val drop: Drop) : Screen {
 
@@ -23,7 +20,7 @@ class GameScreen(val drop: Drop) : Screen {
     private var camera: OrthographicCamera
     private var bucket: Rectangle
     private var touchPos: Vector3
-    private var raindrops: Array<Rectangle> // gdx, not Kotlin Array
+//    private var raindrops: Array<Rectangle> // gdx, not Kotlin Array
     private var lastDropTime: Long = 0L
     private var dropsGathered: Int = 0
 
@@ -59,18 +56,19 @@ class GameScreen(val drop: Drop) : Screen {
         touchPos = Vector3()
 
         // create the raindrops array and spawn the first raindrop
-        raindrops = Array<Rectangle>()
-        spawnRaindrop()
+//        raindrops = Array<Rectangle>()
+//        spawnRaindrop()
     }
-    private fun spawnRaindrop() {
-        var raindrop = Rectangle()
-        raindrop.x = MathUtils.random(0f, 800f-64f)
-        raindrop.y = 480f
-        raindrop.width = 64f
-        raindrop.height = 64f
-        raindrops.add(raindrop)
-        lastDropTime = TimeUtils.nanoTime()
-    }
+
+//    private fun spawnRaindrop() {
+//        var raindrop = Rectangle()
+//        raindrop.x = MathUtils.random(0f, 800f-64f)
+//        raindrop.y = 480f
+//        raindrop.width = 64f
+//        raindrop.height = 64f
+//        raindrops.add(raindrop)
+//        lastDropTime = TimeUtils.nanoTime()
+//    }
 
     override fun render(delta: Float) {
 
@@ -104,8 +102,13 @@ class GameScreen(val drop: Drop) : Screen {
 //        }
 
         state.entities.forEach { entity ->
-            drop.batch.draw(entity.image, entity.x.toFloat(), drop.height - entity.y.toFloat())
+            //drop.batch.draw(entity.sprite, entity.x.toFloat(), entity.y.toFloat())
+            entity.sprite.draw(drop.batch)
         }
+
+        //drop.batch.draw(state.tankPlayer.sprite, state.tankPlayer.x.toFloat(), state.tankPlayer.y.toFloat())
+        state.tankPlayer.sprite.draw(drop.batch)
+
 
         drop.batch.end()
 

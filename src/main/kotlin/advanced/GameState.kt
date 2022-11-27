@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Sprite
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.lang.Thread.sleep
 import java.util.concurrent.Executors
@@ -11,6 +12,13 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
+import kotlin.system.exitProcess
+
+
+/**
+ * DEHUMANIZE YOURSELF AND FACE TO BLOODSHED
+ * -- "The Screamer" (PC-98, Japan)
+ */
 
 enum class GamePhase {
     IDLE,
@@ -20,26 +28,34 @@ enum class GamePhase {
 }
 
 
-
 data class GameState(
     val gamePhase: GamePhase,
     val mouseX: Int = 0,
     val mouseY: Int = 0,
-    val entities: List<Entity> = listOf()
+    val entities: List<Entity> = listOf(),
+    val tankPlayer: Entity
 ) {
     fun updateState(): GameState {
-        return this.copy(entities = entities.map { it.update() })
+        return this.copy(
+            entities = entities.map { it.update() },
+        tankPlayer = tankPlayer.update())
     }
 }
 
 class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputProcessor {
 
     enum class ImageType {
+        PLAYER,
         ROBOT
     }
 
     private val textureMap = ImageType.values().associateWith {
         when (it) {
+
+            ImageType.PLAYER -> {
+                Texture(Gdx.files.internal("tank_1.png"))
+            }
+
             ImageType.ROBOT -> {
                 Texture(Gdx.files.internal("robot_basic.png"))
             }
@@ -49,10 +65,13 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
     val gameStateFlow = MutableStateFlow(
         GameState(
             gamePhase = GamePhase.IN_PLAY,
-            entities =  (1..100)
+            entities = (1..100)
                 .map {
-                Robot(textureMap[ImageType.ROBOT]!!, Random.nextInt(width), Random.nextInt(height))
-            }.toList()))
+                    Robot(textureMap[ImageType.ROBOT]!!, Random.nextInt(width), Random.nextInt(height))
+                }.toList(),
+            tankPlayer = Tank(textureMap[ImageType.PLAYER]!!, 300, 300)
+        )
+    )
 
     private val continueRunning = AtomicBoolean(true)
 
@@ -68,7 +87,7 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
             }
             sleep(10)
         }
-    }, 10, TimeUnit.MILLISECONDS)
+    }, 5, TimeUnit.MILLISECONDS)
 
 
     fun destroy() {
@@ -81,11 +100,14 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
 
         println(">>> key pressed: $keycode")
 
-        when {
-            (keycode == Input.Keys.ESCAPE) -> {
+        when (keycode) {
+            Input.Keys.ESCAPE -> {
                 gameStateFlow.value = gameStateFlow.value.copy(
                     gamePhase = GamePhase.TEARDOWN,
-                    entities = listOf())
+                    entities = listOf()
+                )
+
+                exitProcess(0)
             }
 
             else -> {
@@ -101,6 +123,37 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
     }
 
     override fun keyTyped(character: Char): Boolean {
+
+        val state = gameStateFlow.value
+
+        when (character) {
+
+            'w' -> {
+                gameStateFlow.value =
+                    gameStateFlow.value.copy(tankPlayer = state.tankPlayer.updatePositionByDelta(deltaX = 0, deltaY = 100))
+            }
+
+            's' -> {
+                gameStateFlow.value =
+                    gameStateFlow.value.copy(
+                        tankPlayer = state.tankPlayer.updatePositionByDelta(
+                            deltaX = 0,
+                            deltaY = -100
+                        )
+                    )
+            }
+
+            'a' -> {
+                gameStateFlow.value =
+                    gameStateFlow.value.copy(tankPlayer = state.tankPlayer.updateOrientationByDelta(5.0f))
+            }
+
+            'd' -> {
+                gameStateFlow.value =
+                    gameStateFlow.value.copy(tankPlayer = state.tankPlayer.updateOrientationByDelta(-5.0f))
+            }
+        }
+
         return true
     }
 
