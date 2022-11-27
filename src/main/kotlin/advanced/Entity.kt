@@ -22,7 +22,12 @@ interface Entity {
     fun render() {}
 }
 
-data class Robot(val texture: Texture, override val x: Float, override val y: Float, override val orientation: Float = 0.0f) : Entity {
+data class Robot(
+    val texture: Texture,
+    override val x: Float,
+    override val y: Float,
+    override val orientation: Float = 0.0f
+) : Entity {
 
     override val sprite: Sprite = Sprite(texture, texture.width, texture.height)
 
@@ -46,7 +51,12 @@ data class Robot(val texture: Texture, override val x: Float, override val y: Fl
 
 }
 
-data class Tank(val texture: Texture, override val x: Float, override val y: Float, override val orientation: Float = 0.0f) :
+data class Tank(
+    val texture: Texture,
+    override val x: Float,
+    override val y: Float,
+    override val orientation: Float = 0.0f
+) :
     Entity {
 
     override val sprite: Sprite = Sprite(texture, texture.width, texture.height)
@@ -63,7 +73,13 @@ data class Tank(val texture: Texture, override val x: Float, override val y: Flo
     fun processKeyboardInput(input: Set<KeyboardInput>): Tank {
         return if (input.containsAll(listOf(KeyboardInput.LEFT_TREAD_FWD, KeyboardInput.RIGHT_TREAD_FWD))) {
 //            println("DOUBLE FORWARD $orientation")
-            println(""" ori: $orientation dX: ${(kotlin.math.cos(orientation.toDouble()) * Math.PI / 180 * -movementSpeed).toInt()} "dY: ${kotlin.math.sin(orientation.toDouble()) * Math.PI / 180 * -movementSpeed}""")
+            println(
+                """ ori: $orientation dX: ${(kotlin.math.cos(orientation.toDouble()) * Math.PI / 180 * -movementSpeed).toInt()} "dY: ${
+                    kotlin.math.sin(
+                        orientation.toDouble()
+                    ) * Math.PI / 180 * -movementSpeed
+                }"""
+            )
             updatePositionByDelta(
                 (kotlin.math.cos(orientation.toDouble() * Math.PI / 180) * movementSpeed).toFloat(),
                 (kotlin.math.sin(orientation.toDouble() * Math.PI / 180) * movementSpeed).toFloat()
@@ -74,15 +90,27 @@ data class Tank(val texture: Texture, override val x: Float, override val y: Flo
                 (kotlin.math.cos(orientation.toDouble() * Math.PI / 180) * -movementSpeed).toFloat(),
                 (kotlin.math.sin(orientation.toDouble() * Math.PI / 180) * -movementSpeed).toFloat()
             ) as Tank
-        } else if(input.contains(KeyboardInput.RIGHT_TREAD_FWD) || input.contains(KeyboardInput.LEFT_TREAD_BACK)) {
-//            println("RIGHT FORWARD / LEFT BACK")
-            updateOrientationByDelta(rotationSpeed) as Tank
-        } else if (input.any { it == KeyboardInput.RIGHT_TREAD_BACK || it == KeyboardInput.LEFT_TREAD_FWD}) {
-//            println("LEFT FORWARD / RIGHT BACK")
-            updateOrientationByDelta(-rotationSpeed) as Tank
-        }
-        else {
-            this
+        } else {
+
+            var returnReference = this as Tank
+
+            if (input.contains(KeyboardInput.RIGHT_TREAD_FWD)) {
+                returnReference = returnReference.updateOrientationByDelta(rotationSpeed) as Tank
+            }
+
+            if (input.contains(KeyboardInput.LEFT_TREAD_BACK)) {
+                returnReference = returnReference.updateOrientationByDelta(rotationSpeed) as Tank
+            }
+
+            if (input.contains(KeyboardInput.RIGHT_TREAD_BACK)) {
+                returnReference = returnReference.updateOrientationByDelta(-rotationSpeed) as Tank
+            }
+
+            if (input.contains(KeyboardInput.LEFT_TREAD_FWD)) {
+                returnReference = returnReference.updateOrientationByDelta(-rotationSpeed) as Tank
+            }
+
+            returnReference
         }
     }
 
