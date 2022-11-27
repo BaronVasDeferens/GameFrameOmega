@@ -27,20 +27,32 @@ enum class GamePhase {
     TEARDOWN
 }
 
+enum class KeyboardInput {
+    LEFT_TREAD_FWD,
+    LEFT_TREAD_BACK,
+    RIGHT_TREAD_FWD,
+    RIGHT_TREAD_BACK
+}
+
 
 data class GameState(
     val gamePhase: GamePhase,
     val mouseX: Int = 0,
     val mouseY: Int = 0,
     val entities: List<Entity> = listOf(),
-    val tankPlayer: Entity
+    val tankPlayer: Entity,
+    val inputs: Set<KeyboardInput> = setOf()
 ) {
     fun updateState(): GameState {
         return this.copy(
             entities = entities.map { it.update() },
-        tankPlayer = tankPlayer.update())
+            tankPlayer = with(tankPlayer as Tank) {
+                tankPlayer.processKeyboardInput(inputs).update()
+            }
+        )
     }
 }
+
 
 class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputProcessor {
 
@@ -67,9 +79,9 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
             gamePhase = GamePhase.IN_PLAY,
             entities = (1..100)
                 .map {
-                    Robot(textureMap[ImageType.ROBOT]!!, Random.nextInt(width), Random.nextInt(height))
+                    Robot(textureMap[ImageType.ROBOT]!!, Random.nextInt(width).toFloat(), Random.nextInt(height).toFloat())
                 }.toList(),
-            tankPlayer = Tank(textureMap[ImageType.PLAYER]!!, 300, 300)
+            tankPlayer = Tank(textureMap[ImageType.PLAYER]!!, 300.0f, 300.0f)
         )
     )
 
@@ -98,8 +110,6 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
     override fun keyDown(keycode: Int): Boolean {
         val state = gameStateFlow.value
 
-        println(">>> key pressed: $keycode")
-
         when (keycode) {
             Input.Keys.ESCAPE -> {
                 gameStateFlow.value = gameStateFlow.value.copy(
@@ -110,15 +120,55 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
                 exitProcess(0)
             }
 
+            Input.Keys.Q -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.LEFT_TREAD_FWD))
+            }
+
+            Input.Keys.A -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.LEFT_TREAD_BACK))
+            }
+
+            Input.Keys.E -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.RIGHT_TREAD_FWD))
+            }
+
+            Input.Keys.D -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.RIGHT_TREAD_BACK))
+            }
+
             else -> {
 
             }
         }
 
+        println(gameStateFlow.value.inputs)
+
         return true
     }
 
     override fun keyUp(keycode: Int): Boolean {
+
+        val state = gameStateFlow.value
+        when(keycode){
+            Input.Keys.Q -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.LEFT_TREAD_FWD))
+            }
+
+            Input.Keys.A -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.LEFT_TREAD_BACK))
+            }
+
+            Input.Keys.E -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.RIGHT_TREAD_FWD))
+            }
+
+            Input.Keys.D -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.RIGHT_TREAD_BACK))
+            }
+        }
+
+        println(gameStateFlow.value.inputs)
+
         return true
     }
 
@@ -126,33 +176,38 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
 
         val state = gameStateFlow.value
 
-        when (character) {
-
-            'w' -> {
-                gameStateFlow.value =
-                    gameStateFlow.value.copy(tankPlayer = state.tankPlayer.updatePositionByDelta(deltaX = 0, deltaY = 100))
-            }
-
-            's' -> {
-                gameStateFlow.value =
-                    gameStateFlow.value.copy(
-                        tankPlayer = state.tankPlayer.updatePositionByDelta(
-                            deltaX = 0,
-                            deltaY = -100
-                        )
-                    )
-            }
-
-            'a' -> {
-                gameStateFlow.value =
-                    gameStateFlow.value.copy(tankPlayer = state.tankPlayer.updateOrientationByDelta(5.0f))
-            }
-
-            'd' -> {
-                gameStateFlow.value =
-                    gameStateFlow.value.copy(tankPlayer = state.tankPlayer.updateOrientationByDelta(-5.0f))
-            }
-        }
+//        when (character) {
+//
+//            'w' -> {
+//                gameStateFlow.value =
+//                    gameStateFlow.value.copy(
+//                        tankPlayer = state.tankPlayer.updatePositionByDelta(
+//                            deltaX = 0,
+//                            deltaY = 100
+//                        )
+//                    )
+//            }
+//
+//            's' -> {
+//                gameStateFlow.value =
+//                    gameStateFlow.value.copy(
+//                        tankPlayer = state.tankPlayer.updatePositionByDelta(
+//                            deltaX = 0,
+//                            deltaY = -100
+//                        )
+//                    )
+//            }
+//
+//            'a' -> {
+//                gameStateFlow.value =
+//                    gameStateFlow.value.copy(tankPlayer = state.tankPlayer.updateOrientationByDelta(5.0f))
+//            }
+//
+//            'd' -> {
+//                gameStateFlow.value =
+//                    gameStateFlow.value.copy(tankPlayer = state.tankPlayer.updateOrientationByDelta(-5.0f))
+//            }
+//        }
 
         return true
     }
@@ -161,7 +216,7 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
         val state = gameStateFlow.value
         when (state.gamePhase) {
             GamePhase.IN_PLAY -> {
-                val robot = Robot(Texture(Gdx.files.internal("robot_basic.png")), state.mouseX, state.mouseY)
+                val robot = Robot(Texture(Gdx.files.internal("robot_basic.png")), state.mouseX.toFloat(), state.mouseY.toFloat())
                 gameStateFlow.value = state.copy(entities = state.entities.plus(robot))
                 println(">>> total entities: ${gameStateFlow.value.entities.size}")
             }
