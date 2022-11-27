@@ -103,11 +103,15 @@ class GameScreen(val drop: Drop) : Screen {
 
         state.entities.forEach { entity ->
             //drop.batch.draw(entity.sprite, entity.x.toFloat(), entity.y.toFloat())
-            entity.sprite.draw(drop.batch)
+            entity.tankSprite.draw(drop.batch)
         }
 
         //drop.batch.draw(state.tankPlayer.sprite, state.tankPlayer.x.toFloat(), state.tankPlayer.y.toFloat())
-        state.tankPlayer.sprite.draw(drop.batch)
+
+        with (state.tankPlayer as Tank) {
+            tankSprite.draw(drop.batch)
+            turretSprite.draw(drop.batch)
+        }
 
 
         drop.batch.end()

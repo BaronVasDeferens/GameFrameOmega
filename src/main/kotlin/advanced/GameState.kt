@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Sprite
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.lang.Thread.sleep
 import java.util.concurrent.Executors
@@ -31,7 +30,9 @@ enum class KeyboardInput {
     LEFT_TREAD_FWD,
     LEFT_TREAD_BACK,
     RIGHT_TREAD_FWD,
-    RIGHT_TREAD_BACK
+    RIGHT_TREAD_BACK,
+    TURRET_ROTATE_RIGHT,
+    TURRET_ROTATE_LEFT
 }
 
 
@@ -57,15 +58,20 @@ data class GameState(
 class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputProcessor {
 
     enum class ImageType {
-        PLAYER,
+        TANK_BODY,
+        TANK_TURRET,
         ROBOT
     }
 
     private val textureMap = ImageType.values().associateWith {
         when (it) {
 
-            ImageType.PLAYER -> {
-                Texture(Gdx.files.internal("tank_1.png"))
+            ImageType.TANK_BODY -> {
+                Texture(Gdx.files.internal("tank_2.png"))
+            }
+
+            ImageType.TANK_TURRET -> {
+                Texture(Gdx.files.internal("turret_2.png"))
             }
 
             ImageType.ROBOT -> {
@@ -81,7 +87,7 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
                 .map {
                     Robot(textureMap[ImageType.ROBOT]!!, Random.nextInt(width).toFloat(), Random.nextInt(height).toFloat())
                 }.toList(),
-            tankPlayer = Tank(textureMap[ImageType.PLAYER]!!, 300.0f, 300.0f)
+            tankPlayer = Tank(textureMap[ImageType.TANK_BODY]!!,textureMap[ImageType.TANK_TURRET]!!, 300.0f, 300.0f)
         )
     )
 
@@ -120,6 +126,7 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
                 exitProcess(0)
             }
 
+            // Body
             Input.Keys.Q -> {
                 gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.LEFT_TREAD_FWD))
             }
@@ -134,6 +141,15 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
 
             Input.Keys.D -> {
                 gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.RIGHT_TREAD_BACK))
+            }
+
+            // Turret
+            Input.Keys.J -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.TURRET_ROTATE_LEFT))
+            }
+
+            Input.Keys.L -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.TURRET_ROTATE_RIGHT))
             }
 
             else -> {
@@ -164,6 +180,14 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
 
             Input.Keys.D -> {
                 gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.RIGHT_TREAD_BACK))
+            }
+
+            Input.Keys.J -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.TURRET_ROTATE_LEFT))
+            }
+
+            Input.Keys.L -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.TURRET_ROTATE_RIGHT))
             }
         }
 

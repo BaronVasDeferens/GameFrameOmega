@@ -2,14 +2,12 @@ package advanced
 
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
-import java.lang.Math.*
-import kotlin.random.Random
 
 interface Entity {
-    val sprite: Sprite
+    val tankSprite: Sprite
     val x: Float
     val y: Float
-    val orientation: Float
+    val bodyOrientation: Float
 
     fun update(): Entity {
         return this
@@ -26,19 +24,19 @@ data class Robot(
     val texture: Texture,
     override val x: Float,
     override val y: Float,
-    override val orientation: Float = 0.0f
+    override val bodyOrientation: Float = 0.0f
 ) : Entity {
 
-    override val sprite: Sprite = Sprite(texture, texture.width, texture.height)
+    override val tankSprite: Sprite = Sprite(texture, texture.width, texture.height)
 
     init {
-        sprite.setPosition(x.toFloat(), y.toFloat())
-        sprite.rotation = orientation
+        tankSprite.setPosition(x.toFloat(), y.toFloat())
+        tankSprite.rotation = bodyOrientation
     }
 
 
     override fun update(): Entity {
-        return this.copy(orientation = orientation + 1.0f)
+        return this.copy(bodyOrientation = bodyOrientation + 1.0f)
     }
 
     override fun updatePositionByDelta(deltaX: Float, deltaY: Float): Entity {
@@ -46,82 +44,87 @@ data class Robot(
     }
 
     override fun updateOrientationByDelta(delta: Float): Entity {
-        return this.copy(orientation = (orientation + delta) % 360)
+        return this.copy(bodyOrientation = (bodyOrientation + delta) % 360)
     }
 
 }
 
 data class Tank(
-    val texture: Texture,
+    val tankTexture: Texture,
+    val turretTexture: Texture,
     override val x: Float,
     override val y: Float,
-    override val orientation: Float = 0.0f
-) :
-    Entity {
+    override val bodyOrientation: Float = 0.0f,
+    val turretOrientation: Float = 0.0f
+) : Entity {
 
-    override val sprite: Sprite = Sprite(texture, texture.width, texture.height)
-    private val rotationSpeed = 0.5f
+    override val tankSprite: Sprite = Sprite(tankTexture, tankTexture.width, tankTexture.height)
+    val turretSprite: Sprite = Sprite(turretTexture, turretTexture.width, turretTexture.height)
+
+    val turretRotationSpeed = 2.0f
+    private val bodyRotationSpeed = 0.5f
     private val movementSpeed = 2
 
-    init {
-//        sprite.setPosition(x.toFloat(), y.toFloat())
-//        sprite.rotation = orientation
-//
-//        println(orientation)
-    }
 
     fun processKeyboardInput(input: Set<KeyboardInput>): Tank {
-        return if (input.containsAll(listOf(KeyboardInput.LEFT_TREAD_FWD, KeyboardInput.RIGHT_TREAD_FWD))) {
-//            println("DOUBLE FORWARD $orientation")
-            println(
-                """ ori: $orientation dX: ${(kotlin.math.cos(orientation.toDouble()) * Math.PI / 180 * -movementSpeed).toInt()} "dY: ${
-                    kotlin.math.sin(
-                        orientation.toDouble()
-                    ) * Math.PI / 180 * -movementSpeed
-                }"""
-            )
-            updatePositionByDelta(
-                (kotlin.math.cos(orientation.toDouble() * Math.PI / 180) * movementSpeed).toFloat(),
-                (kotlin.math.sin(orientation.toDouble() * Math.PI / 180) * movementSpeed).toFloat()
+
+        var returnReference = this
+
+        // Body rotations
+        returnReference = if (input.containsAll(listOf(KeyboardInput.LEFT_TREAD_FWD, KeyboardInput.RIGHT_TREAD_FWD))) {
+            returnReference.updatePositionByDelta(
+                (kotlin.math.cos(bodyOrientation.toDouble() * Math.PI / 180) * movementSpeed).toFloat(),
+                (kotlin.math.sin(bodyOrientation.toDouble() * Math.PI / 180) * movementSpeed).toFloat()
             ) as Tank
         } else if (input.containsAll(listOf(KeyboardInput.LEFT_TREAD_BACK, KeyboardInput.RIGHT_TREAD_BACK))) {
-//            println("DOUBLE BACKWARD $orientation")
-            updatePositionByDelta(
-                (kotlin.math.cos(orientation.toDouble() * Math.PI / 180) * -movementSpeed).toFloat(),
-                (kotlin.math.sin(orientation.toDouble() * Math.PI / 180) * -movementSpeed).toFloat()
+            returnReference.updatePositionByDelta(
+                (kotlin.math.cos(bodyOrientation.toDouble() * Math.PI / 180) * -movementSpeed).toFloat(),
+                (kotlin.math.sin(bodyOrientation.toDouble() * Math.PI / 180) * -movementSpeed).toFloat()
             ) as Tank
         } else {
 
-            var returnReference = this as Tank
-
             if (input.contains(KeyboardInput.RIGHT_TREAD_FWD)) {
-                returnReference = returnReference.updateOrientationByDelta(rotationSpeed) as Tank
+                returnReference = returnReference.updateOrientationByDelta(bodyRotationSpeed) as Tank
             }
 
             if (input.contains(KeyboardInput.LEFT_TREAD_BACK)) {
-                returnReference = returnReference.updateOrientationByDelta(rotationSpeed) as Tank
+                returnReference = returnReference.updateOrientationByDelta(bodyRotationSpeed) as Tank
             }
 
             if (input.contains(KeyboardInput.RIGHT_TREAD_BACK)) {
-                returnReference = returnReference.updateOrientationByDelta(-rotationSpeed) as Tank
+                returnReference = returnReference.updateOrientationByDelta(-bodyRotationSpeed) as Tank
             }
 
             if (input.contains(KeyboardInput.LEFT_TREAD_FWD)) {
-                returnReference = returnReference.updateOrientationByDelta(-rotationSpeed) as Tank
+                returnReference = returnReference.updateOrientationByDelta(-bodyRotationSpeed) as Tank
             }
 
             returnReference
         }
+
+        // Turret rotations
+        if (input.contains(KeyboardInput.TURRET_ROTATE_LEFT)) {
+            returnReference = returnReference.rotateTurretByDelta(-turretRotationSpeed) as Tank
+        }
+
+        if (input.contains(KeyboardInput.TURRET_ROTATE_RIGHT)) {
+            returnReference = returnReference.rotateTurretByDelta(turretRotationSpeed) as Tank
+        }
+
+        return returnReference
     }
 
     override fun update(): Entity {
-        sprite.rotation = orientation
-        sprite.setPosition(x, y)
+        tankSprite.rotation = bodyOrientation
+        turretSprite.rotation = turretOrientation
+        tankSprite.setPosition(x, y)
+        turretSprite.setPosition(x - (turretTexture.width - tankTexture.width) / 2 , y - (turretTexture.height - tankTexture.height) / 2)
         return this
     }
 
     override fun updatePositionByDelta(deltaX: Float, deltaY: Float): Entity {
         //sprite.setPosition(deltaX + x.toFloat(), deltaY + y.toFloat())
+//        turretSprite.setPosition(x, y + (turretTexture.height / 2))
         return this.copy(x = x + deltaX, y = y + deltaY)
     }
 
@@ -131,8 +134,14 @@ data class Tank(
 
     override fun updateOrientationByDelta(delta: Float): Entity {
         //sprite.rotation = kotlin.math.abs(orientation + delta) % 360
-        return this.copy(orientation = kotlin.math.abs(360 + orientation + delta) % 360)
+        val updatedOrientation = kotlin.math.abs(360 + bodyOrientation + delta) % 360
+        return (rotateTurretByDelta(delta) as Tank).copy(bodyOrientation = updatedOrientation)
+
+        //return this.copy(orientationBody = updatedOrientation)
     }
 
+    fun rotateTurretByDelta(delta: Float): Entity {
+        return this.copy(turretOrientation = kotlin.math.abs(360 + turretOrientation + delta) % 360)
+    }
 
 }
