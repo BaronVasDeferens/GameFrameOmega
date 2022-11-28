@@ -32,7 +32,9 @@ enum class KeyboardInput {
     RIGHT_TREAD_FWD,
     RIGHT_TREAD_BACK,
     TURRET_ROTATE_RIGHT,
-    TURRET_ROTATE_LEFT
+    TURRET_ROTATE_LEFT,
+    PRIMARY_FIRE,
+    SECONDARY_FIRE
 }
 
 
@@ -75,7 +77,7 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
             }
 
             ImageType.ROBOT -> {
-                Texture(Gdx.files.internal("robot_basic.png"))
+                Texture(Gdx.files.internal("robot_1.png"))
             }
         }
     }
@@ -122,7 +124,6 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
                     gamePhase = GamePhase.TEARDOWN,
                     entities = listOf()
                 )
-
                 exitProcess(0)
             }
 
@@ -143,6 +144,11 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
                 gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.RIGHT_TREAD_BACK))
             }
 
+            // Main gun
+            Input.Keys.SPACE -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.PRIMARY_FIRE))
+            }
+
             // Turret
             Input.Keys.J -> {
                 gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.TURRET_ROTATE_LEFT))
@@ -152,13 +158,14 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
                 gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.TURRET_ROTATE_RIGHT))
             }
 
+            Input.Keys.K -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.SECONDARY_FIRE))
+            }
+
             else -> {
 
             }
         }
-
-        println(gameStateFlow.value.inputs)
-
         return true
     }
 
@@ -166,6 +173,8 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
 
         val state = gameStateFlow.value
         when(keycode){
+
+            // Body
             Input.Keys.Q -> {
                 gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.LEFT_TREAD_FWD))
             }
@@ -182,6 +191,12 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
                 gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.RIGHT_TREAD_BACK))
             }
 
+            // Main gun
+            Input.Keys.SPACE -> {
+                // Only the GameState can remove this
+            }
+
+            // Turret
             Input.Keys.J -> {
                 gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.TURRET_ROTATE_LEFT))
             }
@@ -189,50 +204,17 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
             Input.Keys.L -> {
                 gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.TURRET_ROTATE_RIGHT))
             }
+
+            Input.Keys.K -> {
+                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.SECONDARY_FIRE))
+            }
+
+
         }
-
-        println(gameStateFlow.value.inputs)
-
         return true
     }
 
     override fun keyTyped(character: Char): Boolean {
-
-        val state = gameStateFlow.value
-
-//        when (character) {
-//
-//            'w' -> {
-//                gameStateFlow.value =
-//                    gameStateFlow.value.copy(
-//                        tankPlayer = state.tankPlayer.updatePositionByDelta(
-//                            deltaX = 0,
-//                            deltaY = 100
-//                        )
-//                    )
-//            }
-//
-//            's' -> {
-//                gameStateFlow.value =
-//                    gameStateFlow.value.copy(
-//                        tankPlayer = state.tankPlayer.updatePositionByDelta(
-//                            deltaX = 0,
-//                            deltaY = -100
-//                        )
-//                    )
-//            }
-//
-//            'a' -> {
-//                gameStateFlow.value =
-//                    gameStateFlow.value.copy(tankPlayer = state.tankPlayer.updateOrientationByDelta(5.0f))
-//            }
-//
-//            'd' -> {
-//                gameStateFlow.value =
-//                    gameStateFlow.value.copy(tankPlayer = state.tankPlayer.updateOrientationByDelta(-5.0f))
-//            }
-//        }
-
         return true
     }
 

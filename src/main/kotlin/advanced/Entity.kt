@@ -2,6 +2,7 @@ package advanced
 
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
+import java.util.concurrent.atomic.AtomicBoolean
 
 interface Entity {
     val tankSprite: Sprite
@@ -30,7 +31,7 @@ data class Robot(
     override val tankSprite: Sprite = Sprite(texture, texture.width, texture.height)
 
     init {
-        tankSprite.setPosition(x.toFloat(), y.toFloat())
+        tankSprite.setPosition(x, y)
         tankSprite.rotation = bodyOrientation
     }
 
@@ -46,8 +47,12 @@ data class Robot(
     override fun updateOrientationByDelta(delta: Float): Entity {
         return this.copy(bodyOrientation = (bodyOrientation + delta) % 360)
     }
-
 }
+
+
+
+
+
 
 data class Tank(
     val tankTexture: Texture,
@@ -65,6 +70,11 @@ data class Tank(
     private val bodyRotationSpeed = 0.5f
     private val movementSpeed = 2
 
+    val isFiringPrimary = AtomicBoolean(false)
+    val isFiringSecondary = AtomicBoolean(false)
+
+    private var ammunitionPrimary = 100
+    private var ammunitionSecondary = 10_000
 
     fun processKeyboardInput(input: Set<KeyboardInput>): Tank {
 
@@ -104,11 +114,11 @@ data class Tank(
 
         // Turret rotations
         if (input.contains(KeyboardInput.TURRET_ROTATE_LEFT)) {
-            returnReference = returnReference.rotateTurretByDelta(-turretRotationSpeed) as Tank
+            returnReference = returnReference.rotateTurretByDelta(turretRotationSpeed) as Tank
         }
 
         if (input.contains(KeyboardInput.TURRET_ROTATE_RIGHT)) {
-            returnReference = returnReference.rotateTurretByDelta(turretRotationSpeed) as Tank
+            returnReference = returnReference.rotateTurretByDelta(-turretRotationSpeed) as Tank
         }
 
         return returnReference
@@ -123,21 +133,15 @@ data class Tank(
     }
 
     override fun updatePositionByDelta(deltaX: Float, deltaY: Float): Entity {
-        //sprite.setPosition(deltaX + x.toFloat(), deltaY + y.toFloat())
-//        turretSprite.setPosition(x, y + (turretTexture.height / 2))
         return this.copy(x = x + deltaX, y = y + deltaY)
     }
 
-    fun moveForward(): Tank {
-        return this
-    }
-
+    /**
+     * Updates the rotation of the body of the tank. Also updates the turret orientation
+     */
     override fun updateOrientationByDelta(delta: Float): Entity {
-        //sprite.rotation = kotlin.math.abs(orientation + delta) % 360
         val updatedOrientation = kotlin.math.abs(360 + bodyOrientation + delta) % 360
         return (rotateTurretByDelta(delta) as Tank).copy(bodyOrientation = updatedOrientation)
-
-        //return this.copy(orientationBody = updatedOrientation)
     }
 
     fun rotateTurretByDelta(delta: Float): Entity {
