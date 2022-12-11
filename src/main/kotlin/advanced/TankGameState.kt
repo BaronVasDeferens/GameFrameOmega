@@ -38,7 +38,7 @@ enum class KeyboardInput {
 }
 
 
-data class GameState(
+data class TankGameState(
     val gamePhase: GamePhase,
     val mouseX: Int = 0,
     val mouseY: Int = 0,
@@ -46,7 +46,7 @@ data class GameState(
     val tankPlayer: Entity,
     val inputs: Set<KeyboardInput> = setOf()
 ) {
-    fun updateState(): GameState {
+    fun updateState(): TankGameState {
         return this.copy(
             entities = entities.map { it.update() },
             tankPlayer = with(tankPlayer as Tank) {
@@ -82,8 +82,8 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
         }
     }
 
-    val gameStateFlow = MutableStateFlow(
-        GameState(
+    val tankGameStateFlow = MutableStateFlow(
+        TankGameState(
             gamePhase = GamePhase.IN_PLAY,
             entities = (1..100)
                 .map {
@@ -97,13 +97,13 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
 
     private val updateJob: ScheduledFuture<*> = Executors.newSingleThreadScheduledExecutor().schedule({
         while (continueRunning.get()) {
-            val state = gameStateFlow.value
+            val state = tankGameStateFlow.value
 
             if (state.gamePhase == GamePhase.TEARDOWN) {
                 continueRunning.set(false)
                 destroy()
             } else {
-                gameStateFlow.value = state.updateState()
+                tankGameStateFlow.value = state.updateState()
             }
             sleep(10)
         }
@@ -116,11 +116,11 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
     }
 
     override fun keyDown(keycode: Int): Boolean {
-        val state = gameStateFlow.value
+        val state = tankGameStateFlow.value
 
         when (keycode) {
             Input.Keys.ESCAPE -> {
-                gameStateFlow.value = gameStateFlow.value.copy(
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(
                     gamePhase = GamePhase.TEARDOWN,
                     entities = listOf()
                 )
@@ -129,37 +129,37 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
 
             // Body
             Input.Keys.Q -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.LEFT_TREAD_FWD))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.LEFT_TREAD_FWD))
             }
 
             Input.Keys.A -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.LEFT_TREAD_BACK))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.LEFT_TREAD_BACK))
             }
 
             Input.Keys.E -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.RIGHT_TREAD_FWD))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.RIGHT_TREAD_FWD))
             }
 
             Input.Keys.D -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.RIGHT_TREAD_BACK))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.RIGHT_TREAD_BACK))
             }
 
             // Main gun
             Input.Keys.SPACE -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.PRIMARY_FIRE))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.PRIMARY_FIRE))
             }
 
             // Turret
             Input.Keys.J -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.TURRET_ROTATE_LEFT))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.TURRET_ROTATE_LEFT))
             }
 
             Input.Keys.L -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.TURRET_ROTATE_RIGHT))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.TURRET_ROTATE_RIGHT))
             }
 
             Input.Keys.K -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.SECONDARY_FIRE))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.SECONDARY_FIRE))
             }
 
             else -> {
@@ -171,24 +171,24 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
 
     override fun keyUp(keycode: Int): Boolean {
 
-        val state = gameStateFlow.value
+        val state = tankGameStateFlow.value
         when(keycode){
 
             // Body
             Input.Keys.Q -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.LEFT_TREAD_FWD))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.LEFT_TREAD_FWD))
             }
 
             Input.Keys.A -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.LEFT_TREAD_BACK))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.LEFT_TREAD_BACK))
             }
 
             Input.Keys.E -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.RIGHT_TREAD_FWD))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.RIGHT_TREAD_FWD))
             }
 
             Input.Keys.D -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.RIGHT_TREAD_BACK))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.RIGHT_TREAD_BACK))
             }
 
             // Main gun
@@ -198,15 +198,15 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
 
             // Turret
             Input.Keys.J -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.TURRET_ROTATE_LEFT))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.TURRET_ROTATE_LEFT))
             }
 
             Input.Keys.L -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.TURRET_ROTATE_RIGHT))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.TURRET_ROTATE_RIGHT))
             }
 
             Input.Keys.K -> {
-                gameStateFlow.value = gameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.SECONDARY_FIRE))
+                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.SECONDARY_FIRE))
             }
 
 
@@ -219,12 +219,12 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
     }
 
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-        val state = gameStateFlow.value
+        val state = tankGameStateFlow.value
         when (state.gamePhase) {
             GamePhase.IN_PLAY -> {
                 val robot = Robot(Texture(Gdx.files.internal("robot_basic.png")), state.mouseX.toFloat(), state.mouseY.toFloat())
-                gameStateFlow.value = state.copy(entities = state.entities.plus(robot))
-                println(">>> total entities: ${gameStateFlow.value.entities.size}")
+                tankGameStateFlow.value = state.copy(entities = state.entities.plus(robot))
+                println(">>> total entities: ${tankGameStateFlow.value.entities.size}")
             }
         }
         return true
@@ -239,7 +239,7 @@ class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputPro
     }
 
     override fun mouseMoved(screenX: Int, screenY: Int): Boolean {
-        gameStateFlow.value = gameStateFlow.value.copy(mouseX = screenX, mouseY = screenY)
+        tankGameStateFlow.value = tankGameStateFlow.value.copy(mouseX = screenX, mouseY = screenY)
         return true
     }
 

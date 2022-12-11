@@ -72,7 +72,7 @@ class GameScreen(val drop: Drop) : Screen {
 
     override fun render(delta: Float) {
 
-        val state = gameStateManager.gameStateFlow.value
+        val state = gameStateManager.tankGameStateFlow.value
 
         if (state.gamePhase == GamePhase.TEARDOWN) {
             gameStateManager.destroy()
