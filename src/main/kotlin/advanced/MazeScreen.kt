@@ -1,5 +1,6 @@
 package advanced
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -8,16 +9,21 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.utils.ScreenUtils
 
+
+/**
+ * MERGANSER
+ */
 class MazeScreen(private val drop: Drop) : Screen {
 
     private val camera = OrthographicCamera()
 
     private var mazeBackgroundSprite: Sprite
 
-    private val divisions = 50
+    private val divisions = 75
     private val mazeStateManager = MazeStateManager(drop.width / divisions, drop.height / divisions, divisions)
 
     init {
+        Gdx.input.inputProcessor = mazeStateManager
         camera.setToOrtho(false, drop.width.toFloat(), drop.height.toFloat())
         mazeBackgroundSprite = mazeStateManager.getMazeBackground(drop.width, drop.height)
     }
@@ -31,7 +37,17 @@ class MazeScreen(private val drop: Drop) : Screen {
         drop.batch.setProjectionMatrix(camera.combined)
         drop.batch.begin()
         with(drop.batch) {
+            val current = mazeStateManager.mazeStateFlow.value
+            val player = current.playerPiece
             mazeBackgroundSprite.draw(this)
+
+            val playerCoords = mazeStateManager.getPlayerMazeDrawingCoords()
+
+            this.draw(
+                mazeStateManager.playerSprite,
+                playerCoords.first.toFloat(),
+                playerCoords.second.toFloat()
+            )
         }
         drop.batch.end()
     }
@@ -136,36 +152,44 @@ class MazeGrid(private val rows: Int, private val cols: Int, private val default
         // Draw the master background
         mazeRooms.forEach { room ->
             mazeBackgroundImage.setColor(room.color)
+            if (room.x == 0 && room.y == 0) {
+                mazeBackgroundImage.setColor(Color.RED)
+            } else if (room.x == 3 && room.y == 3) {
+                mazeBackgroundImage.setColor(Color.BLUE)
+            }
             mazeBackgroundImage.fillRectangle(room.x * room.size, room.y * room.size, room.size, room.size)
         }
 
-        return Sprite(Texture(mazeBackgroundImage))
+        val sprite = Sprite(Texture(mazeBackgroundImage))
+        // LibGDX has (0,0) in the lower LEFT
+        //sprite.flip(false, true)
+        return sprite
     }
 
-fun getRooms(): List<MazeRoom> {
-    return mazeRooms.toList()
-}
+    fun getRooms(): List<MazeRoom> {
+        return mazeRooms.toList()
+    }
 
-fun getRoom(row: Int, col: Int): MazeRoom? {
-    // FIXME: inefficient, unsafe! LOL
-    return mazeRooms.firstOrNull { it.x == row && it.y == col }
-}
+    fun getRoom(row: Int, col: Int): MazeRoom? {
+        // FIXME: inefficient, unsafe! LOL
+        return mazeRooms.firstOrNull { it.x == row && it.y == col }
+    }
 
-fun getAdjacentRooms(room: MazeRoom): List<MazeRoom> {
-    val row = room.x
-    val col = room.y
+    fun getAdjacentRooms(room: MazeRoom): List<MazeRoom> {
+        val row = room.x
+        val col = room.y
 
-    val adjacentRooms = mutableListOf<MazeRoom>();
+        val adjacentRooms = mutableListOf<MazeRoom>();
 
-    adjacentRooms.addAll(
-        listOfNotNull(
-            getRoom(row, col - 1),
-            getRoom(row, col + 1),
-            getRoom(row - 1, col),
-            getRoom(row + 1, col)
+        adjacentRooms.addAll(
+            listOfNotNull(
+                getRoom(row, col - 1),
+                getRoom(row, col + 1),
+                getRoom(row - 1, col),
+                getRoom(row + 1, col)
+            )
         )
-    )
-    return adjacentRooms
-}
+        return adjacentRooms
+    }
 
 }
