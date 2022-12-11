@@ -57,7 +57,7 @@ data class TankGameState(
 }
 
 
-class GameStateManager(val width: Int = 1600, val height: Int = 1200) : InputProcessor {
+class TankGameStateManager(val width: Int = 1600, val height: Int = 1200) : InputProcessor {
 
     enum class ImageType {
         TANK_BODY,

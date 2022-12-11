@@ -7,9 +7,9 @@ import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.utils.ScreenUtils
 
-class GameScreen(val drop: Drop) : Screen {
+class TankGameScreen(val drop: Drop) : Screen {
 
-    private val gameStateManager = GameStateManager()
+    private val tankGameStateManager = TankGameStateManager()
 
     private var dropImage: Texture
     private var bucketImage: Texture
@@ -29,7 +29,7 @@ class GameScreen(val drop: Drop) : Screen {
     // initializer block
     init {
 
-        Gdx.input.inputProcessor = gameStateManager
+        Gdx.input.inputProcessor = tankGameStateManager
 
         // load the images for the droplet & bucket, 64x64 pixels each
         dropImage = Texture(Gdx.files.internal("fire64.png"))
@@ -72,10 +72,10 @@ class GameScreen(val drop: Drop) : Screen {
 
     override fun render(delta: Float) {
 
-        val state = gameStateManager.tankGameStateFlow.value
+        val state = tankGameStateManager.tankGameStateFlow.value
 
         if (state.gamePhase == GamePhase.TEARDOWN) {
-            gameStateManager.destroy()
+            tankGameStateManager.destroy()
             dispose()
         }
 

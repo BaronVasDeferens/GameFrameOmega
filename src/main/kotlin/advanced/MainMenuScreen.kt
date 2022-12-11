@@ -25,7 +25,7 @@ class MainMenuScreen(private val drop: Drop):Screen {
         drop.batch.end()
 
         if (Gdx.input.isTouched) {
-            drop.screen = GameScreen(drop)
+            drop.screen = MazeScreen(drop)
             dispose()
         }
     }
