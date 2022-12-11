@@ -7,28 +7,19 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.utils.ScreenUtils
-import kotlin.random.Random
 
 class MazeScreen(private val drop: Drop) : Screen {
 
     private val camera = OrthographicCamera()
 
-    private val mazeBackgroundImage = Pixmap(drop.width, drop.height, Pixmap.Format.RGBA4444)
     private var mazeBackgroundSprite: Sprite
 
     private val divisions = 50
-    private val mazeRooms = Maze(drop.width / divisions, drop.height / divisions, divisions)
+    private val mazeStateManager = MazeStateManager(drop.width / divisions, drop.height / divisions, divisions)
 
     init {
         camera.setToOrtho(false, drop.width.toFloat(), drop.height.toFloat())
-
-        // Draw the master background
-        mazeRooms.getRooms().forEach { room ->
-            mazeBackgroundImage.setColor(room.color)
-            mazeBackgroundImage.fillRectangle(room.x * room.size, room.y * room.size, room.size, room.size)
-        }
-
-        mazeBackgroundSprite = Sprite(Texture(mazeBackgroundImage))
+        mazeBackgroundSprite = mazeStateManager.getMazeBackground(drop.width, drop.height)
     }
 
     override fun show() {
@@ -78,7 +69,7 @@ data class MazeRoom(val x: Int, val y: Int, val size: Int) {
 }
 
 
-class Maze(private val rows: Int, private val cols: Int, private val defaultSize: Int = 50) {
+class MazeGrid(private val rows: Int, private val cols: Int, private val defaultSize: Int = 50) {
 
     private val mazeRooms = mutableListOf<MazeRoom>()
 
@@ -140,6 +131,16 @@ class Maze(private val rows: Int, private val cols: Int, private val defaultSize
         }
     }
 
+    fun getMazeSprite(width: Int, height: Int): Sprite {
+        val mazeBackgroundImage = Pixmap(width, height, Pixmap.Format.RGBA4444)
+        // Draw the master background
+        mazeRooms.forEach { room ->
+            mazeBackgroundImage.setColor(room.color)
+            mazeBackgroundImage.fillRectangle(room.x * room.size, room.y * room.size, room.size, room.size)
+        }
+
+        return Sprite(Texture(mazeBackgroundImage))
+    }
 
 fun getRooms(): List<MazeRoom> {
     return mazeRooms.toList()
@@ -164,27 +165,6 @@ fun getAdjacentRooms(room: MazeRoom): List<MazeRoom> {
             getRoom(row + 1, col)
         )
     )
-
-//        val up = getRoom(row, col - 1)
-//        if (up != null) {
-//            adjacentRooms.add(up)
-//        }
-//
-//        val down = getRoom(row, col + 1)
-//        if (down != null) {
-//            adjacentRooms.add(down)
-//        }
-//
-//        val left = getRoom(row - 1, col)
-//        if (left != null) {
-//            adjacentRooms.add(left);
-//        }
-//
-//        val right = getRoom(row + 1, col)
-//        if (right != null) {
-//            adjacentRooms.add(right)
-//        }
-
     return adjacentRooms
 }
 
