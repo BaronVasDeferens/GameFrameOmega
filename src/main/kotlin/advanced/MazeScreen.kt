@@ -19,7 +19,7 @@ class MazeScreen(private val drop: Drop) : Screen {
 
     private var mazeBackgroundSprite: Sprite
 
-    private val divisions = 75
+    private val divisions = 50
     private val mazeStateManager = MazeStateManager(drop.width / divisions, drop.height / divisions, divisions)
 
     init {
@@ -37,8 +37,7 @@ class MazeScreen(private val drop: Drop) : Screen {
         drop.batch.setProjectionMatrix(camera.combined)
         drop.batch.begin()
         with(drop.batch) {
-            val current = mazeStateManager.mazeStateFlow.value
-            val player = current.playerPiece
+
             mazeBackgroundSprite.draw(this)
 
             val playerCoords = mazeStateManager.getPlayerMazeDrawingCoords()
@@ -115,9 +114,6 @@ class MazeGrid(private val rows: Int, private val cols: Int, private val default
         inMaze.add(startRoom)
         reachable.add(startRoom)
 
-        println(startRoom)
-        println(getAdjacentRooms(startRoom))
-
         getAdjacentRooms(startRoom).forEach { adjacent ->
             frontier.add(adjacent)
             reachable.add(adjacent)
@@ -152,18 +148,10 @@ class MazeGrid(private val rows: Int, private val cols: Int, private val default
         // Draw the master background
         mazeRooms.forEach { room ->
             mazeBackgroundImage.setColor(room.color)
-            if (room.x == 0 && room.y == 0) {
-                mazeBackgroundImage.setColor(Color.RED)
-            } else if (room.x == 3 && room.y == 3) {
-                mazeBackgroundImage.setColor(Color.BLUE)
-            }
             mazeBackgroundImage.fillRectangle(room.x * room.size, room.y * room.size, room.size, room.size)
         }
 
-        val sprite = Sprite(Texture(mazeBackgroundImage))
-        // LibGDX has (0,0) in the lower LEFT
-        //sprite.flip(false, true)
-        return sprite
+        return Sprite(Texture(mazeBackgroundImage))
     }
 
     fun getRooms(): List<MazeRoom> {

@@ -16,9 +16,12 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
     val playerSprite = Texture(Gdx.files.internal("robot_1.png"))
 
     init {
+
+        println("rows: $rows cols: $cols")
+
         // Place player in viable space
         val current = mazeStateFlow.value
-        val viableSpace = mazeGrid.getRooms().filter { it.isPassable }.shuffled().first()
+        val viableSpace = mazeGrid.getRooms().filter { it.isPassable  && it.y == 1}.shuffled().first()
         mazeStateFlow.value = current.copy(playerPiece = current.playerPiece.copy(x = viableSpace.x, viableSpace.y))
     }
 
@@ -27,11 +30,15 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
         return mazeGrid.getMazeSprite(width, height)
     }
 
+    /**
+     * LibGDX defines the origin (0,0) in the LOWER left instead of the UPPER left.
+     * This means that drawing must be adjusted-- sorry about the ugly math
+     */
     fun getPlayerMazeDrawingCoords(): Pair<Int, Int> {
         val current = mazeStateFlow.value.playerPiece
         return Pair(
-            (current.x * divisions) + (divisions / 2),
-            ((rows - current.y) * divisions) + (divisions / 2)
+            (current.x * divisions) + ((divisions - playerSprite.width) / 2),
+            ((cols - current.y) * divisions) - divisions + ((divisions - playerSprite.width) / 2)
         )
     }
 
