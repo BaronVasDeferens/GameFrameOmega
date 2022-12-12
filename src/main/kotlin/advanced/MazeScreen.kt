@@ -19,7 +19,7 @@ class MazeScreen(private val drop: Drop) : Screen {
 
     private var mazeBackgroundSprite: Sprite
 
-    private val divisions = 50
+    private val divisions = 30
     private val mazeStateManager = MazeStateManager(drop.width / divisions, drop.height / divisions, divisions)
 
     init {

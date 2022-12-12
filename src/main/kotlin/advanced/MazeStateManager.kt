@@ -21,7 +21,7 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
 
         // Place player in viable space
         val current = mazeStateFlow.value
-        val viableSpace = mazeGrid.getRooms().filter { it.isPassable  && it.y == 1}.shuffled().first()
+        val viableSpace: MazeRoom = mazeGrid.getRooms().filter { it.isPassable }.sortedBy { it.x + it.y }.first()
         mazeStateFlow.value = current.copy(playerPiece = current.playerPiece.copy(x = viableSpace.x, viableSpace.y))
     }
 
@@ -55,7 +55,6 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
                     ?.takeIf {
                         it.isPassable
                     }?.apply {
-                        println("UP")
                         mazeStateFlow.value = current.copy(playerPiece = current.playerPiece.updatePosition(this))
                     }
             }
@@ -65,7 +64,6 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
                 mazeGrid.getRoom(current.playerPiece.x, current.playerPiece.y + 1)?.takeIf {
                     it.isPassable
                 }?.apply {
-                    println("DOWN")
                     mazeStateFlow.value = current.copy(playerPiece = current.playerPiece.updatePosition(this))
                 }
             }
@@ -75,7 +73,6 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
                 mazeGrid.getRoom(current.playerPiece.x - 1, current.playerPiece.y)?.takeIf {
                     it.isPassable
                 }?.apply {
-                    println("LEFT")
                     mazeStateFlow.value = current.copy(playerPiece = current.playerPiece.updatePosition(this))
                 }
             }
@@ -85,7 +82,6 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
                 mazeGrid.getRoom(current.playerPiece.x + 1, current.playerPiece.y)?.takeIf {
                     it.isPassable
                 }?.apply {
-                    println("RIGHT")
                     mazeStateFlow.value = current.copy(playerPiece = current.playerPiece.updatePosition(this))
                 }
             }
@@ -146,7 +142,6 @@ data class MazeGameState(
 data class PlayerPiece(val x: Int = 1, val y: Int = 1) {
 
     fun updatePosition(room: MazeRoom): PlayerPiece {
-        println("Player position updated: $x $y -> ${room.x} ${room.y}")
         return this.copy(x = room.x, y = room.y)
     }
 
