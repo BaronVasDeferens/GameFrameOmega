@@ -19,7 +19,7 @@ class MazeScreen(private val drop: Drop) : Screen {
 
     private var mazeBackgroundSprite: Sprite
 
-    private val divisions = 30
+    private val divisions = 60
     private val mazeStateManager = MazeStateManager(drop.width / divisions, drop.height / divisions, divisions)
 
     init {
@@ -33,7 +33,7 @@ class MazeScreen(private val drop: Drop) : Screen {
     }
 
     override fun render(delta: Float) {
-        ScreenUtils.clear(1.0f, 1.0f, 1.0f, 1.0f)
+        ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
         drop.batch.setProjectionMatrix(camera.combined)
         drop.batch.begin()
         with(drop.batch) {
@@ -145,6 +145,11 @@ class MazeGrid(private val rows: Int, private val cols: Int, private val default
 
     fun getMazeSprite(width: Int, height: Int): Sprite {
         val mazeBackgroundImage = Pixmap(width, height, Pixmap.Format.RGBA4444)
+
+        // Clear background
+        mazeBackgroundImage.setColor(Color.BLACK)
+        mazeBackgroundImage.drawRectangle(0,0, width, height)
+
         // Draw the master background
         mazeRooms.forEach { room ->
             mazeBackgroundImage.setColor(room.color)
