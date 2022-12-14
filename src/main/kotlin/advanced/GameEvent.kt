@@ -20,9 +20,9 @@ data class GameEvent(
 
         return if (isActive) {
 
-//            with(Gdx.audio.newSound(Gdx.files.internal("beep.mp3"))) {
-//                play(1.0f)
-//            }
+            with(Gdx.audio.newSound(Gdx.files.internal("beep.mp3"))) {
+                play(1.0f)
+            }
 
             eventFunction.invoke()
 
