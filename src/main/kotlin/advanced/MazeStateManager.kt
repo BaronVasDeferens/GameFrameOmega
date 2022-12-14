@@ -18,7 +18,7 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
 
     val mazeStateFlow = MutableStateFlow(MazeGameState())
 
-    val playerSprite = Texture(Gdx.files.internal("robot_1.png"))
+    val playerSprite = Texture(Gdx.files.internal("wanderer.png"))
 
 
     /**
@@ -37,13 +37,12 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
             mazeGrid.getRooms().filter { it.isPassable }.sortedBy { it.x + it.y }
         val playerStartingRoom = viableStartingLocations.first()
 
+        // TODO: task loading audio files to an audio asset manager
         val beep: Clip = AudioSystem.getClip()
         val beepFile = File("src\\main\\resources\\beep_3a.wav")
         /* PCM_SIGNED 44100.0 Hz, 16 bit, stereo, 4 bytes/frame, little-endian */
         val ais: AudioInputStream = AudioSystem.getAudioInputStream(beepFile)
-        println(beep.format)
         beep.open(ais)
-
 
         val doorClosesIntroEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, true) {
             println(
@@ -221,14 +220,17 @@ data class MazeGameState(
 
         val events = gameEvents[newRoom] ?: listOf()
 
+        println("Turn:${turnNumber + 1} / Pos:(${newRoom.x},${newRoom.y})")
+
+
         val updatedEvents = events
             .sortedBy { it.priority }
             .map {
-                println("(${newRoom.x} , ${newRoom.y})")
                 it.triggerEvent()
             }
 
         return this.copy(
+            turnNumber = turnNumber + 1,
             playerPiece = updatedPlayer,
             gameEvents = gameEvents.plus(newRoom to updatedEvents)
         )
