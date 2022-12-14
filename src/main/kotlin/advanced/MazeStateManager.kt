@@ -38,8 +38,10 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
         val playerStartingRoom = viableStartingLocations.first()
 
         val beep: Clip = AudioSystem.getClip()
-        val beepFile = File("src\\main\\resources\\beep_2.wav")  // mono 44,100 mono 32-bit float
+        val beepFile = File("src\\main\\resources\\beep_3a.wav")
+        /* PCM_SIGNED 44100.0 Hz, 16 bit, stereo, 4 bytes/frame, little-endian */
         val ais: AudioInputStream = AudioSystem.getAudioInputStream(beepFile)
+        println(beep.format)
         beep.open(ais)
 
 
@@ -87,7 +89,7 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
                 viableStartingLocations.filter { room ->
                     val adjacentRooms = mazeGrid.getAdjacentRooms(room)
                     adjacentRooms.size == 4 && adjacentRooms.filterNot { it.isPassable }.size == 3
-                }.sortedBy { it.x + it.y }.takeLast(5).random() to listOf(presidentFoundEvent)
+                }.sortedByDescending{ it.x + it.y }.first() to listOf(presidentFoundEvent)
             )
         )
 
