@@ -4,11 +4,14 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.utils.ScreenUtils
 
 class MainMenuScreen(private val drop: Drop):Screen {
 
     private var camera: OrthographicCamera = OrthographicCamera()
+
+    private val logoSprite = Texture(Gdx.files.internal("wanderer_logo.png"))
 
     init {
         camera.setToOrtho(false, drop.width.toFloat(), drop.height.toFloat())
@@ -20,9 +23,9 @@ class MainMenuScreen(private val drop: Drop):Screen {
         camera.update();
         drop.batch.projectionMatrix = camera.combined;
 
-        drop.batch.begin();
-        drop.font.draw(drop.batch, "W A N D E R E R", 100f, 150f)
-        drop.font.draw(drop.batch, "press SPACE to begin", 100f, 100f)
+        drop.batch.begin()
+        drop.batch.draw(logoSprite, 0.0f , 0.0f)
+        drop.font.draw(drop.batch, "press SPACE to begin", drop.width / 2.0f , drop.height.toFloat() * (1.0f/5.0f))
         drop.batch.end()
 
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {

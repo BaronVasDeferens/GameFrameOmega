@@ -71,7 +71,7 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
                 viableStartingLocations.filter { room ->
                     val adjacentRooms = mazeGrid.getAdjacentRooms(room)
                     adjacentRooms.size == 4 && adjacentRooms.filterNot { it.isPassable }.size == 3
-                }.random() to listOf(presidentFoundEvent)
+                }.sortedBy { it.x + it.y }.takeLast(5).random() to listOf(presidentFoundEvent)
             )
         )
 

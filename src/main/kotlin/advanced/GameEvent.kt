@@ -1,7 +1,6 @@
 package advanced
 
 import com.badlogic.gdx.Gdx
-import java.awt.Toolkit
 
 
 enum class GameEventType {
@@ -20,11 +19,10 @@ data class GameEvent(
 
         return if (isActive) {
 
+            eventFunction.invoke()
             with(Gdx.audio.newSound(Gdx.files.internal("beep.mp3"))) {
                 play(1.0f)
             }
-
-            eventFunction.invoke()
 
             if (expires) {
                 this.copy(isActive = false)
