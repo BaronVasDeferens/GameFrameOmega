@@ -6,6 +6,10 @@ import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.io.File
+import javax.sound.sampled.AudioInputStream
+import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.Clip
 import kotlin.system.exitProcess
 
 class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : InputProcessor {
@@ -33,6 +37,12 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
             mazeGrid.getRooms().filter { it.isPassable }.sortedBy { it.x + it.y }
         val playerStartingRoom = viableStartingLocations.first()
 
+        val beep: Clip = AudioSystem.getClip()
+        val beepFile = File("src\\main\\resources\\beep_2.wav")  // mono 44,100 mono 32-bit float
+        val ais: AudioInputStream = AudioSystem.getAudioInputStream(beepFile)
+        beep.open(ais)
+
+
         val doorClosesIntroEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, true) {
             println(
                 """The exit seals noiselessly and, just one moment later, is gone without as a seam. 
@@ -43,6 +53,8 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
         }
 
         val garbageEvent = GameEvent(GameEventType.FLAVOR_TEXT, 2, false) {
+            beep.framePosition = 0
+            beep.start()
             println(
                 """This area is strewn with the debris of human lives and activity, all warn and deeply soiled.
                     |There is nothing worth scavenging.
@@ -52,11 +64,15 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
         }
 
         val somewhereEvent = GameEvent(GameEventType.FLAVOR_TEXT, 2, false) {
+            beep.framePosition = 0
+            beep.start()
             println("""The skeletal remains of a large animal, desiccated and ragged, lies here.""")
         }
 
         val presidentFoundEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, false) {
-            println("""You found the president!""")
+            beep.framePosition = 0
+            beep.start()
+            println("""YOU HAVE FOUND THE PRESIDENT!""")
         }
 
         mazeStateFlow.value = mazeStateFlow.value.copy(

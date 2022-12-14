@@ -1,7 +1,5 @@
 package advanced
 
-import com.badlogic.gdx.Gdx
-
 
 enum class GameEventType {
     FLAVOR_TEXT
@@ -15,15 +13,11 @@ data class GameEvent(
     private val eventFunction: () -> Unit
 ) {
 
+
     fun triggerEvent(): GameEvent {
 
         return if (isActive) {
-
             eventFunction.invoke()
-            with(Gdx.audio.newSound(Gdx.files.internal("beep.mp3"))) {
-                play(1.0f)
-            }
-
             if (expires) {
                 this.copy(isActive = false)
             } else {
