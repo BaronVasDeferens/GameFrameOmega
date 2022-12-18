@@ -3,6 +3,8 @@ package advanced
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.InputProcessor
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,10 +20,10 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
     private var roomSize: Int = 60
 
     val mazeStateFlow = MutableStateFlow(MazeGameState(mazeGrid = MazeGrid(rows, cols)))
+
+    // Renderables
     val mazeRenderedSprite = MutableStateFlow<Sprite?>(null)
-
-
-    val playerSprite = Texture(Gdx.files.internal("wanderer.png"))
+    val playerSprite = Pixmap(Gdx.files.internal("wanderer.png"))
 
 
     /**
@@ -32,8 +34,12 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
      *
      */
     init {
+        reinitializeMazeGameState()
+    }
 
-        println("rows: $rows cols: $cols")
+    private fun reinitializeMazeGameState() {
+
+        mazeStateFlow.value = MazeGameState(mazeGrid = MazeGrid(rows, cols))
 
         // Place player in viable space
         val viableStartingLocations: List<MazeRoom> =
@@ -103,20 +109,21 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
     }
 
 
-    fun renderMazeSprite(): Sprite {
-        return mazeStateFlow.value.mazeGrid.renderMaze(imageWidth, imageHeight, 0, 0, roomSize)
-    }
+    private fun renderMazeSprite(): Sprite {
+        val current = mazeStateFlow.value
 
-    /**
-     * LibGDX defines the origin (0,0) in the LOWER left instead of the UPPER left.
-     * This means that drawing must be adjusted-- sorry about the ugly math
-     */
-    fun getPlayerMazeDrawingCoords(): Pair<Int, Int> {
-        val current = mazeStateFlow.value.playerPiece
-        return Pair(
-            (current.x * roomSize) + ((roomSize - playerSprite.width) / 2),
-            ((cols - current.y) * roomSize) - roomSize + ((roomSize - playerSprite.width) / 2)
-        )
+        // Render the background
+        val bg = current.mazeGrid.renderMazeToPixmap(imageWidth, imageHeight, 0, 0, roomSize)
+
+        // Render the events
+        current.gameEvents.entries.filter{ it.value.isNotEmpty() }.forEach {
+            bg.setColor(Color.WHITE)
+            bg.fillCircle((it.key.x * roomSize) + roomSize / 2, (it.key.y * roomSize) + roomSize / 2, roomSize / 4)
+        }
+
+        // Render the player sprite
+        bg.drawPixmap(playerSprite, current.playerPiece.x * roomSize, current.playerPiece.y * roomSize)
+        return Sprite(Texture(bg))
     }
 
     /**
@@ -164,6 +171,11 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
                 }?.apply {
                     mazeStateFlow.value = current.updatePlayerPosition(this)
                 }
+            }
+
+            Keys.R -> {
+                println("------------------- RESETTING! -----------------------")
+                reinitializeMazeGameState()
             }
 
             Keys.ESCAPE -> {
@@ -229,7 +241,7 @@ data class MazeGameState(
 
         val events = gameEvents[newRoom] ?: listOf()
 
-        println("Turn:${turnNumber + 1} / Pos:(${newRoom.x},${newRoom.y})")
+        println("Turn:${turnNumber + 1} / Pos:(${newRoom.x},${newRoom.y})  EVENTS: ${events.size}")
 
 
         val updatedEvents = events

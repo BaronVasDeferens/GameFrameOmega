@@ -2,8 +2,6 @@ package advanced
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Sprite
 
 data class MazeRoom(val x: Int, val y: Int) {
 
@@ -83,7 +81,7 @@ class MazeGrid(private val cols: Int, private val rows: Int) {
             .toSet()
     }
 
-    fun renderMaze(width: Int, height: Int, startX: Int = rows, startY: Int = cols, roomSize: Int): Sprite {
+    fun renderMazeToPixmap(width: Int, height: Int, startX: Int = rows, startY: Int = cols, roomSize: Int): Pixmap {
         val mazeBackgroundImage = Pixmap(width, height, Pixmap.Format.RGBA4444)
 
         // Clear background
@@ -96,7 +94,7 @@ class MazeGrid(private val cols: Int, private val rows: Int) {
             mazeBackgroundImage.fillRectangle(room.x * roomSize, room.y * roomSize, roomSize, roomSize)
         }
 
-        return Sprite(Texture(mazeBackgroundImage))
+        return mazeBackgroundImage
     }
 
     fun getRooms(): List<MazeRoom> {

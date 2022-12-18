@@ -27,20 +27,11 @@ class MazeScreen(private val drop: Drop) : Screen {
         ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
         drop.batch.setProjectionMatrix(camera.combined)
         drop.batch.begin()
-        with(drop.batch) {
 
-            mazeStateManager.mazeRenderedSprite.value?.apply {
-                draw(this@with)
-            }
-
-            val playerCoords = mazeStateManager.getPlayerMazeDrawingCoords()
-
-            this.draw(
-                mazeStateManager.playerSprite,
-                playerCoords.first.toFloat(),
-                playerCoords.second.toFloat()
-            )
+        mazeStateManager.mazeRenderedSprite.value?.apply {
+            draw(drop.batch)
         }
+
         drop.batch.end()
     }
 
