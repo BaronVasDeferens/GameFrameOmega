@@ -39,6 +39,8 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 
     private fun reinitializeMazeGameState() {
 
+        println("------------------- INITIALIZING -------------------")
+
         mazeStateFlow.value = MazeGameState(mazeGrid = MazeGrid(rows, cols))
 
         // Place player in viable space
@@ -121,6 +123,10 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             bg.fillCircle((it.key.x * roomSize) + roomSize / 2, (it.key.y * roomSize) + roomSize / 2, roomSize / 4)
         }
 
+//        bg.setColor(Color.BLACK.r, Color.BLACK.g, Color.BLACK.b, 0.50f)
+//        bg.blending = Pixmap.Blending.SourceOver
+//        bg.fillCircle(imageWidth/ 2, imageHeight / 2, 100)
+
         // Render the player sprite
         bg.drawPixmap(playerSprite, current.playerPiece.x * roomSize, current.playerPiece.y * roomSize)
         return Sprite(Texture(bg))
@@ -174,7 +180,6 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             }
 
             Keys.R -> {
-                println("------------------- RESETTING! -----------------------")
                 reinitializeMazeGameState()
             }
 
@@ -241,7 +246,7 @@ data class MazeGameState(
 
         val events = gameEvents[newRoom] ?: listOf()
 
-        println("Turn:${turnNumber + 1} / Pos:(${newRoom.x},${newRoom.y})  EVENTS: ${events.size}")
+        println("Turn:${turnNumber + 1} / Pos:(${newRoom.x},${newRoom.y})")
 
 
         val updatedEvents = events
