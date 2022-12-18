@@ -12,9 +12,7 @@ import com.badlogic.gdx.utils.ScreenUtils
 class MazeScreen(private val drop: Drop) : Screen {
 
     private val camera = OrthographicCamera()
-
-    private val roomSize = 60
-    private val mazeStateManager = MazeStateManager(drop.width, drop.height, 20, 20, roomSize)
+    private val mazeStateManager = MazeStateManager(drop.width, drop.height, 20, 20)
 
     init {
         Gdx.input.inputProcessor = mazeStateManager

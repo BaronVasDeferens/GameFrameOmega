@@ -12,11 +12,12 @@ import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Clip
 import kotlin.system.exitProcess
 
-class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int, val cols: Int, val roomSize: Int) : InputProcessor {
+class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int, val cols: Int) : InputProcessor {
 
-    private val mazeGrid = MazeGrid(rows, cols)
+    private var gridWindowSize = 10
+    private var roomSize: Int = 60
 
-    val mazeStateFlow = MutableStateFlow(MazeGameState())
+    val mazeStateFlow = MutableStateFlow(MazeGameState(mazeGrid = MazeGrid(rows, cols)))
     val mazeRenderedSprite = MutableStateFlow<Sprite?>(null)
 
 
@@ -36,7 +37,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 
         // Place player in viable space
         val viableStartingLocations: List<MazeRoom> =
-            mazeGrid.getRooms().filter { it.isPassable }.sortedBy { it.x + it.y }
+            mazeStateFlow.value.mazeGrid.getRooms().filter { it.isPassable }.sortedBy { it.x + it.y }
         val playerStartingRoom = viableStartingLocations.first()
 
         // TODO: task loading audio files to an audio asset manager
@@ -91,9 +92,9 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
                 viableStartingLocations.random() to listOf(somewhereEvent),
                 // Put the president in a cul-de-sac
                 viableStartingLocations.filter { room ->
-                    val adjacentRooms = mazeGrid.getAdjacentRooms(room)
+                    val adjacentRooms = mazeStateFlow.value.mazeGrid.getAdjacentRooms(room)
                     adjacentRooms.size == 4 && adjacentRooms.filterNot { it.isPassable }.size == 3
-                }.sortedByDescending{ it.x + it.y }.first() to listOf(presidentFoundEvent)
+                }.maxByOrNull { it.x + it.y }!! to listOf(presidentFoundEvent)
             )
         )
 
@@ -103,7 +104,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 
 
     fun renderMazeSprite(): Sprite {
-        return mazeGrid.renderMaze(imageWidth, imageHeight, 0, 0, roomSize)
+        return mazeStateFlow.value.mazeGrid.renderMaze(imageWidth, imageHeight, 0, 0, roomSize)
     }
 
     /**
@@ -128,7 +129,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             Keys.UP,
             Keys.W -> {
                 // Move UP
-                mazeGrid.getRoom(current.playerPiece.x, current.playerPiece.y - 1)?.takeIf {
+                mazeStateFlow.value.mazeGrid.getRoom(current.playerPiece.x, current.playerPiece.y - 1)?.takeIf {
                     it.isPassable
                 }?.apply {
                     mazeStateFlow.value = current.updatePlayerPosition(this)
@@ -138,7 +139,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             // Move DOWN
             Keys.DOWN,
             Keys.S -> {
-                mazeGrid.getRoom(current.playerPiece.x, current.playerPiece.y + 1)?.takeIf {
+                mazeStateFlow.value.mazeGrid.getRoom(current.playerPiece.x, current.playerPiece.y + 1)?.takeIf {
                     it.isPassable
                 }?.apply {
                     mazeStateFlow.value = current.updatePlayerPosition(this)
@@ -148,7 +149,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             // Move LEFT
             Keys.LEFT,
             Keys.A -> {
-                mazeGrid.getRoom(current.playerPiece.x - 1, current.playerPiece.y)?.takeIf {
+                mazeStateFlow.value.mazeGrid.getRoom(current.playerPiece.x - 1, current.playerPiece.y)?.takeIf {
                     it.isPassable
                 }?.apply {
                     mazeStateFlow.value = current.updatePlayerPosition(this)
@@ -158,7 +159,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             // Move RIGHT
             Keys.RIGHT,
             Keys.D -> {
-                mazeGrid.getRoom(current.playerPiece.x + 1, current.playerPiece.y)?.takeIf {
+                mazeStateFlow.value.mazeGrid.getRoom(current.playerPiece.x + 1, current.playerPiece.y)?.takeIf {
                     it.isPassable
                 }?.apply {
                     mazeStateFlow.value = current.updatePlayerPosition(this)
@@ -217,6 +218,7 @@ enum class MazeGamePhase {
 data class MazeGameState(
     val turnNumber: Int = 1,
     val phase: MazeGamePhase = MazeGamePhase.PLAYER_MOVING,
+    val mazeGrid: MazeGrid,
     val playerPiece: PlayerPiece = PlayerPiece(),
     val gameEvents: Map<MazeRoom, List<GameEvent>> = mapOf()
 ) {

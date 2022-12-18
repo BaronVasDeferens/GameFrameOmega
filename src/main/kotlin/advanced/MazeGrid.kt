@@ -16,7 +16,10 @@ data class MazeRoom(val x: Int, val y: Int) {
 }
 
 
-class MazeGrid(private val rows: Int, private val cols: Int) {
+/**
+ * COLS and ROWS intentionally swapped, here
+ */
+class MazeGrid(private val cols: Int, private val rows: Int) {
 
     private val mazeRooms = mutableListOf<MazeRoom>()
 
@@ -75,8 +78,9 @@ class MazeGrid(private val rows: Int, private val cols: Int) {
         }
     }
 
-    fun getSubsection(startX: Int = 0, startY: Int = 0, size: Int = 20): Set<MazeRoom> {
-        return getRooms().filter { (it.x >= startX) && (it.x <= startX + size) && (it.y >= startY) && (it.y <= startY + size)}.toSet()
+    fun getMazeSubsection(startX: Int = 0, startY: Int = 0, subsectionSize: Int): Set<MazeRoom> {
+        return getRooms().filter { (it.x >= startX) && (it.x <= startX + subsectionSize) && (it.y >= startY) && (it.y <= startY + subsectionSize) }
+            .toSet()
     }
 
     fun renderMaze(width: Int, height: Int, startX: Int = rows, startY: Int = cols, roomSize: Int): Sprite {
@@ -84,10 +88,10 @@ class MazeGrid(private val rows: Int, private val cols: Int) {
 
         // Clear background
         mazeBackgroundImage.setColor(Color.BLACK)
-        mazeBackgroundImage.drawRectangle(0,0, width, height)
+        mazeBackgroundImage.drawRectangle(0, 0, width, height)
 
         // Draw the master background
-        getSubsection().forEach { room ->
+        getMazeSubsection(subsectionSize = 20).forEach { room ->
             mazeBackgroundImage.setColor(room.color)
             mazeBackgroundImage.fillRectangle(room.x * roomSize, room.y * roomSize, roomSize, roomSize)
         }
