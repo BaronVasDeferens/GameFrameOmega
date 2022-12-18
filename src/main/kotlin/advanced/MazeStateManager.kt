@@ -12,11 +12,13 @@ import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Clip
 import kotlin.system.exitProcess
 
-class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : InputProcessor {
+class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int, val cols: Int, val divisions: Int) : InputProcessor {
 
     private val mazeGrid = MazeGrid(rows, cols, divisions)
 
     val mazeStateFlow = MutableStateFlow(MazeGameState())
+    val mazeRenderedSprite = MutableStateFlow<Sprite?>(null)
+
 
     val playerSprite = Texture(Gdx.files.internal("wanderer.png"))
 
@@ -54,6 +56,7 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
         }
 
         val garbageEvent = GameEvent(GameEventType.FLAVOR_TEXT, 2, false) {
+            beep.stop()
             beep.framePosition = 0
             beep.start()
             println(
@@ -65,12 +68,14 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
         }
 
         val somewhereEvent = GameEvent(GameEventType.FLAVOR_TEXT, 2, false) {
+            beep.stop()
             beep.framePosition = 0
             beep.start()
             println("""The skeletal remains of a large animal, desiccated and ragged, lies here.""")
         }
 
         val presidentFoundEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, false) {
+            beep.stop()
             beep.framePosition = 0
             beep.start()
             println("""YOU HAVE FOUND THE PRESIDENT!""")
@@ -93,11 +98,12 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
         )
 
         mazeStateFlow.value = mazeStateFlow.value.updatePlayerPosition(playerStartingRoom)
+        mazeRenderedSprite.value = renderMazeSprite()
     }
 
 
-    fun getMazeBackground(width: Int, height: Int): Sprite {
-        return mazeGrid.getMazeSprite(width, height)
+    fun renderMazeSprite(): Sprite {
+        return mazeGrid.getMazeSprite(imageWidth, imageHeight)
     }
 
     /**
@@ -168,6 +174,7 @@ class MazeStateManager(val rows: Int, val cols: Int, val divisions: Int) : Input
             }
         }
 
+        mazeRenderedSprite.value = renderMazeSprite()
         return true
     }
 

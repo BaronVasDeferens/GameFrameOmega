@@ -17,15 +17,12 @@ class MazeScreen(private val drop: Drop) : Screen {
 
     private val camera = OrthographicCamera()
 
-    private var mazeBackgroundSprite: Sprite
-
     private val divisions = 60
-    private val mazeStateManager = MazeStateManager(drop.width / divisions, drop.height / divisions, divisions)
+    private val mazeStateManager = MazeStateManager(drop.width, drop.height, drop.width / divisions, drop.height / divisions, divisions)
 
     init {
         Gdx.input.inputProcessor = mazeStateManager
         camera.setToOrtho(false, drop.width.toFloat(), drop.height.toFloat())
-        mazeBackgroundSprite = mazeStateManager.getMazeBackground(drop.width, drop.height)
     }
 
     override fun show() {
@@ -38,7 +35,9 @@ class MazeScreen(private val drop: Drop) : Screen {
         drop.batch.begin()
         with(drop.batch) {
 
-            mazeBackgroundSprite.draw(this)
+            mazeStateManager.mazeRenderedSprite.value?.apply {
+                draw(this@with)
+            }
 
             val playerCoords = mazeStateManager.getPlayerMazeDrawingCoords()
 
@@ -143,7 +142,7 @@ class MazeGrid(private val rows: Int, private val cols: Int, private val default
         }
     }
 
-    fun getMazeSprite(width: Int, height: Int): Sprite {
+    fun getMazeSprite(width: Int, height: Int, renderRows: Int = rows, renderCols: Int = cols): Sprite {
         val mazeBackgroundImage = Pixmap(width, height, Pixmap.Format.RGBA4444)
 
         // Clear background
