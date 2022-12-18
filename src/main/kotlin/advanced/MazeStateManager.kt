@@ -12,9 +12,9 @@ import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Clip
 import kotlin.system.exitProcess
 
-class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int, val cols: Int, val divisions: Int) : InputProcessor {
+class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int, val cols: Int, val roomSize: Int) : InputProcessor {
 
-    private val mazeGrid = MazeGrid(rows, cols, divisions)
+    private val mazeGrid = MazeGrid(rows, cols)
 
     val mazeStateFlow = MutableStateFlow(MazeGameState())
     val mazeRenderedSprite = MutableStateFlow<Sprite?>(null)
@@ -103,7 +103,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 
 
     fun renderMazeSprite(): Sprite {
-        return mazeGrid.getMazeSprite(imageWidth, imageHeight)
+        return mazeGrid.renderMaze(imageWidth, imageHeight, 0, 0, roomSize)
     }
 
     /**
@@ -113,8 +113,8 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
     fun getPlayerMazeDrawingCoords(): Pair<Int, Int> {
         val current = mazeStateFlow.value.playerPiece
         return Pair(
-            (current.x * divisions) + ((divisions - playerSprite.width) / 2),
-            ((cols - current.y) * divisions) - divisions + ((divisions - playerSprite.width) / 2)
+            (current.x * roomSize) + ((roomSize - playerSprite.width) / 2),
+            ((cols - current.y) * roomSize) - roomSize + ((roomSize - playerSprite.width) / 2)
         )
     }
 
