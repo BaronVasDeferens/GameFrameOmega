@@ -77,19 +77,20 @@ class MazeGrid(private val cols: Int, private val rows: Int) {
     }
 
     fun getMazeSubsection(startX: Int = 0, startY: Int = 0, subsectionSize: Int): Set<MazeRoom> {
-        return getRooms().filter { (it.x >= startX) && (it.x <= startX + subsectionSize) && (it.y >= startY) && (it.y <= startY + subsectionSize) }
+        return getRooms()
+            .filter { (it.x >= startX) && (it.x <= startX + subsectionSize) && (it.y >= startY) && (it.y <= startY + subsectionSize) }
             .toSet()
     }
 
-    fun renderMazeToPixmap(width: Int, height: Int, startX: Int = rows, startY: Int = cols, roomSize: Int): Pixmap {
-        val mazeBackgroundImage = Pixmap(width, height, Pixmap.Format.RGBA4444)
+    fun renderMazeToPixmap(imageWidth: Int, imageHeight: Int, startX: Int, startY: Int, subsectionSize: Int, roomSize: Int): Pixmap {
+        val mazeBackgroundImage = Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA4444)
 
         // Clear background
-        mazeBackgroundImage.setColor(Color.BLACK)
-        mazeBackgroundImage.drawRectangle(0, 0, width, height)
+        mazeBackgroundImage.setColor(Color.RED)
+        mazeBackgroundImage.drawRectangle(0, 0, imageWidth, imageHeight)
 
         // Draw the master background
-        getMazeSubsection(subsectionSize = 20).forEach { room ->
+        getMazeSubsection(startX = startX, startY= startY, subsectionSize = subsectionSize).forEach { room ->
             mazeBackgroundImage.setColor(room.color)
             mazeBackgroundImage.fillRectangle(room.x * roomSize, room.y * roomSize, roomSize, roomSize)
         }

@@ -16,8 +16,12 @@ import kotlin.system.exitProcess
 
 class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int, val cols: Int) : InputProcessor {
 
-    private var gridWindowSize = 10
-    private var roomSize: Int = 60
+    private var gridSquaresPerScreen = 8         // The number of maze rooms to show on each axis
+    private var gridWindowX = 0
+    private var gridWindowY = 0
+
+    private var roomSize: Int = listOf((imageWidth / gridSquaresPerScreen), (imageHeight / gridSquaresPerScreen)).minOf { it }
+
 
     val mazeStateFlow = MutableStateFlow(MazeGameState(mazeGrid = MazeGrid(rows, cols)))
 
@@ -55,10 +59,13 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
         val ais: AudioInputStream = AudioSystem.getAudioInputStream(beepFile)
         beep.open(ais)
 
+
+        /* DUMB EVENTS */
+
         val doorClosesIntroEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, true) {
             println(
-                """The exit seals noiselessly and, just one moment later, is gone without as a seam. 
-                |Walls of featureless black obsidian soar impossibly into the darkness. 
+                """The exit closes noiselessly.  
+                |The walls of the complex, featureless and black, soar impossibly into the darkness. 
                 |The complex is still, lit only by your lanterns.
                 |""".trimMargin()
             )
@@ -83,6 +90,21 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             println("""The skeletal remains of a large animal, desiccated and ragged, lies here.""")
         }
 
+        val wideOpenSpaceEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, false) {
+            beep.stop()
+            beep.framePosition = 0
+            beep.start()
+            println("""A data terminal lies in pieces here, utterly smashed beyond repair.""")
+        }
+
+        val gapEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, false) {
+            beep.stop()
+            beep.framePosition = 0
+            beep.start()
+            println("""This passage is marked as gang territory.""")
+        }
+
+
         val presidentFoundEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, false) {
             beep.stop()
             beep.framePosition = 0
@@ -96,8 +118,16 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
                     doorClosesIntroEvent,
                     garbageEvent
                 ),
+
                 // Put the skeleton in some random room
                 viableStartingLocations.random() to listOf(somewhereEvent),
+
+                // Put the "wide open" event in a wide-open space
+                viableStartingLocations.filter { room -> mazeStateFlow.value.mazeGrid.getAdjacentRooms(room).all { it.isPassable }}.random() to listOf(wideOpenSpaceEvent),
+
+                // Put the passage event in a gap
+                viableStartingLocations.filter{ room -> mazeStateFlow.value.mazeGrid.getAdjacentRooms(room).filter { it.isPassable }.size == 2}.random() to listOf(gapEvent),
+
                 // Put the president in a cul-de-sac
                 viableStartingLocations.filter { room ->
                     val adjacentRooms = mazeStateFlow.value.mazeGrid.getAdjacentRooms(room)
@@ -114,12 +144,18 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
     private fun renderMazeSprite(): Sprite {
         val current = mazeStateFlow.value
 
-        // Render the background
-        val bg = current.mazeGrid.renderMazeToPixmap(imageWidth, imageHeight, 0, 0, roomSize)
+        // Compute the sub-window
+        gridWindowX = 0 // current.playerPiece.x
+        gridWindowY = 0 // current.playerPiece.y
 
-        // Render the events
+
+
+        // Render the background
+        val bg = current.mazeGrid.renderMazeToPixmap(imageWidth, imageHeight, gridWindowX, gridWindowY, gridSquaresPerScreen, roomSize)
+
+        // Render the events as dots on the map
         current.gameEvents.entries.filter{ it.value.isNotEmpty() }.forEach {
-            bg.setColor(Color.WHITE)
+            bg.setColor(Color.LIGHT_GRAY)
             bg.fillCircle((it.key.x * roomSize) + roomSize / 2, (it.key.y * roomSize) + roomSize / 2, roomSize / 4)
         }
 
@@ -128,7 +164,11 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 //        bg.fillCircle(imageWidth/ 2, imageHeight / 2, 100)
 
         // Render the player sprite
-        bg.drawPixmap(playerSprite, current.playerPiece.x * roomSize, current.playerPiece.y * roomSize)
+        bg.drawPixmap(playerSprite,
+            current.playerPiece.x * roomSize + (roomSize / 2) - (playerSprite.width / 2),
+            current.playerPiece.y * roomSize + (roomSize / 2) - (playerSprite.height / 2))
+
+
         return Sprite(Texture(bg))
     }
 
@@ -179,16 +219,34 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
                 }
             }
 
+            // DEBUG: create a new maze
             Keys.R -> {
                 reinitializeMazeGameState()
             }
 
+            // DEBUG: Increase room size
+            Keys.NUMPAD_ADD,
+            Keys.EQUALS -> {
+                roomSize += 10
+                println("INCREASING ROOM SIZE: $roomSize")
+                mazeRenderedSprite.value = renderMazeSprite()
+            }
+
+            // DEBUG: Decrease room size
+            Keys.NUMPAD_SUBTRACT,
+            Keys.MINUS -> {
+                roomSize -= 10
+                println("DECREASING ROOM SIZE: $roomSize")
+                mazeRenderedSprite.value = renderMazeSprite()
+            }
+
+            // QUIT
             Keys.ESCAPE -> {
                 exitProcess(0)
             }
 
             else -> {
-
+                println(keycode)
             }
         }
 
