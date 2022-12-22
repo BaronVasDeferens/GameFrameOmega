@@ -20,7 +20,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
     private var gridWindowX = 0
     private var gridWindowY = 0
 
-    private var roomSize: Int = listOf((imageWidth / gridSquaresPerScreen), (imageHeight / gridSquaresPerScreen)).minOf { it }
+    private var roomSize: Int = 100 // listOf((imageWidth / gridSquaresPerScreen), (imageHeight / gridSquaresPerScreen)).minOf { it }
 
 
     val mazeStateFlow = MutableStateFlow(MazeGameState(mazeGrid = MazeGrid(rows, cols)))
@@ -145,10 +145,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
         val current = mazeStateFlow.value
 
         // Compute the sub-window
-        gridWindowX = 0 // current.playerPiece.x
-        gridWindowY = 0 // current.playerPiece.y
-
-
+        recomputeMazeWindowCoordinates()
 
         // Render the background
         val bg = current.mazeGrid.renderMazeToPixmap(imageWidth, imageHeight, gridWindowX, gridWindowY, gridSquaresPerScreen, roomSize)
@@ -156,7 +153,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
         // Render the events as dots on the map
         current.gameEvents.entries.filter{ it.value.isNotEmpty() }.forEach {
             bg.setColor(Color.LIGHT_GRAY)
-            bg.fillCircle((it.key.x * roomSize) + roomSize / 2, (it.key.y * roomSize) + roomSize / 2, roomSize / 4)
+            bg.fillCircle(((it.key.x - gridWindowX) * roomSize) + roomSize / 2, ((it.key.y - gridWindowY) * roomSize) + roomSize / 2, roomSize / 4)
         }
 
 //        bg.setColor(Color.BLACK.r, Color.BLACK.g, Color.BLACK.b, 0.50f)
@@ -165,8 +162,8 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 
         // Render the player sprite
         bg.drawPixmap(playerSprite,
-            current.playerPiece.x * roomSize + (roomSize / 2) - (playerSprite.width / 2),
-            current.playerPiece.y * roomSize + (roomSize / 2) - (playerSprite.height / 2))
+            (current.playerPiece.x - gridWindowX) * roomSize + (roomSize / 2) - (playerSprite.width / 2),
+            (current.playerPiece.y - gridWindowY) * roomSize + (roomSize / 2) - (playerSprite.height / 2))
 
 
         return Sprite(Texture(bg))
@@ -281,6 +278,29 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 
     override fun scrolled(amountX: Float, amountY: Float): Boolean {
         return true
+    }
+
+
+    private fun recomputeMazeWindowCoordinates() {
+
+        val current = mazeStateFlow.value
+        val pX = current.playerPiece.x
+        val pY = current.playerPiece.y
+
+        gridWindowX = pX - (gridSquaresPerScreen / 2 - 1)
+        if (gridWindowX < 0) {
+            gridWindowX = 0
+        } else if (gridWindowX >= cols - gridSquaresPerScreen) {
+            gridWindowX = cols - gridSquaresPerScreen
+        }
+
+        gridWindowY = pY - (gridSquaresPerScreen / 2 - 1)
+        if (gridWindowY < 0) {
+            gridWindowY = 0
+        } else if (gridWindowY >= rows - gridSquaresPerScreen) {
+            gridWindowY = rows - gridSquaresPerScreen
+        }
+
     }
 
 }

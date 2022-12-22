@@ -92,7 +92,7 @@ class MazeGrid(private val cols: Int, private val rows: Int) {
         // Draw the master background
         getMazeSubsection(startX = startX, startY= startY, subsectionSize = subsectionSize).forEach { room ->
             mazeBackgroundImage.setColor(room.color)
-            mazeBackgroundImage.fillRectangle(room.x * roomSize, room.y * roomSize, roomSize, roomSize)
+            mazeBackgroundImage.fillRectangle((room.x - startX) * roomSize, (room.y - startY) * roomSize, roomSize, roomSize)
         }
 
         return mazeBackgroundImage
