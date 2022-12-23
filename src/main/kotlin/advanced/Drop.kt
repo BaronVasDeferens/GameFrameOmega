@@ -6,12 +6,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 
 class Drop(val width: Int, val height: Int) : Game() {
 
-    public lateinit var batch: SpriteBatch
-    public lateinit var font: BitmapFont
+    lateinit var batch: SpriteBatch
+    lateinit var font: BitmapFont
 
     override fun create() {
         batch = SpriteBatch()
-        // use LibGDX's default Arial font
         font = BitmapFont()
         this.setScreen(MainMenuScreen(this))
     }

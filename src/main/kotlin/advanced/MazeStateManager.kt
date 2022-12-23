@@ -280,7 +280,10 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
         return true
     }
 
-
+    /**
+     * Keeps the player centered in the maze. When the player approaches the edges of the maze, this keeps the rendering
+     * confined to the area of the maze.
+     */
     private fun recomputeMazeWindowCoordinates() {
 
         val current = mazeStateFlow.value
@@ -300,9 +303,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
         } else if (gridWindowY >= rows - gridSquaresPerScreen) {
             gridWindowY = rows - gridSquaresPerScreen
         }
-
     }
-
 }
 
 enum class MazeGamePhase {
