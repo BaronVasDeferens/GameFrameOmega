@@ -10,21 +10,11 @@ data class GameEvent(
     val priority: Int,
     val expires: Boolean,
     val isActive: Boolean = true,
-    private val eventFunction: () -> Unit
+    private val eventFunction: (gameState: MazeGameState) -> MazeGameState
 ) {
 
 
-    fun triggerEvent(): GameEvent {
-
-        return if (isActive) {
-            eventFunction.invoke()
-            if (expires) {
-                this.copy(isActive = false)
-            } else {
-                this.copy()
-            }
-        } else {
-            this
-        }
+    fun triggerEvent(gameState: MazeGameState): MazeGameState {
+        return eventFunction.invoke(gameState)
     }
 }

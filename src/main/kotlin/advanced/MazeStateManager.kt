@@ -20,7 +20,8 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
     private var gridWindowX = 0
     private var gridWindowY = 0
 
-    private var roomSize: Int = 100 // listOf((imageWidth / gridSquaresPerScreen), (imageHeight / gridSquaresPerScreen)).minOf { it }
+    private var roomSize: Int =
+        100 // listOf((imageWidth / gridSquaresPerScreen), (imageHeight / gridSquaresPerScreen)).minOf { it }
 
 
     val mazeStateFlow = MutableStateFlow(MazeGameState(mazeGrid = MazeGrid(rows, cols)))
@@ -48,8 +49,8 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
         mazeStateFlow.value = MazeGameState(mazeGrid = MazeGrid(rows, cols))
 
         // Place player in viable space
-        val viableStartingLocations: List<MazeRoom> =
-            mazeStateFlow.value.mazeGrid.getRooms().filter { it.isPassable }.sortedBy { it.x + it.y }
+        val viableStartingLocations: MutableList<MazeRoom> =
+            mazeStateFlow.value.mazeGrid.getRooms().filter { it.isPassable }.sortedBy { it.x + it.y }.toMutableList()
         val playerStartingRoom = viableStartingLocations.first()
 
         // TODO: task loading audio files to an audio asset manager
@@ -62,16 +63,18 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 
         /* DUMB EVENTS */
 
-        val doorClosesIntroEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, true) {
+        val doorClosesIntroEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, true) { gameState ->
             println(
                 """The exit closes noiselessly.  
                 |The walls of the complex, featureless and black, soar impossibly into the darkness. 
                 |The complex is still, lit only by your lanterns.
                 |""".trimMargin()
             )
+
+            gameState
         }
 
-        val garbageEvent = GameEvent(GameEventType.FLAVOR_TEXT, 2, false) {
+        val garbageEvent = GameEvent(GameEventType.FLAVOR_TEXT, 2, false) { gameState ->
             beep.stop()
             beep.framePosition = 0
             beep.start()
@@ -81,60 +84,93 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
                     |
                 """.trimMargin()
             )
+            gameState
+
         }
 
-        val somewhereEvent = GameEvent(GameEventType.FLAVOR_TEXT, 2, false) {
+        val somewhereEvent = GameEvent(GameEventType.FLAVOR_TEXT, 2, false) { gameState ->
             beep.stop()
             beep.framePosition = 0
             beep.start()
             println("""The skeletal remains of a large animal, desiccated and ragged, lies here.""")
+            gameState
+
         }
 
-        val wideOpenSpaceEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, false) {
+        val wideOpenSpaceEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, false) { gameState ->
             beep.stop()
             beep.framePosition = 0
             beep.start()
             println("""A data terminal lies in pieces here, utterly smashed beyond repair.""")
+            gameState
+
         }
 
-        val gapEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, false) {
+        val gapEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, false) { gameState ->
             beep.stop()
             beep.framePosition = 0
             beep.start()
             println("""This passage is marked as gang territory.""")
+            gameState
+
         }
 
 
-        val presidentFoundEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, false) {
+        val presidentFoundEvent = GameEvent(GameEventType.FLAVOR_TEXT, 1, false) { gameState ->
             beep.stop()
             beep.framePosition = 0
             beep.start()
             println("""YOU HAVE FOUND THE PRESIDENT!""")
+            gameState
+
         }
+
+        val foodCaches = GameEvent(GameEventType.FLAVOR_TEXT, 2, true) { gameState ->
+            beep.stop()
+            beep.framePosition = 0
+            beep.start()
+            println("""You have found a food cache!""")
+            gameState.copy(foodRemaining = gameState.foodRemaining + 5)
+        }
+
+
+        viableStartingLocations.shuffled()
 
         mazeStateFlow.value = mazeStateFlow.value.copy(
             gameEvents = mapOf(
+
+                // Starting position for player
                 playerStartingRoom to listOf(
                     doorClosesIntroEvent,
                     garbageEvent
                 ),
 
-                // Put the skeleton in some random room
-                viableStartingLocations.random() to listOf(somewhereEvent),
+//                // Put the animal skeleton in some random room
+//                viableStartingLocations.removeAt(0)  to listOf(somewhereEvent),
+//
+//                // Put the "wide open" event in a wide-open space
+//                viableStartingLocations.filter { room ->
+//                    mazeStateFlow.value.mazeGrid.getAdjacentRooms(room).all { it.isPassable }
+//                }.random() to listOf(wideOpenSpaceEvent),
+//
+//                // Put the passage event in a gap
+//                viableStartingLocations.filter { room ->
+//                    mazeStateFlow.value.mazeGrid.getAdjacentRooms(room).filter { it.isPassable }.size == 2
+//                }.random() to listOf(gapEvent),
+//
+//                // Put the president in a cul-de-sac
+//                viableStartingLocations.filter { room ->
+//                    val adjacentRooms = mazeStateFlow.value.mazeGrid.getAdjacentRooms(room)
+//                    adjacentRooms.size == 4 && adjacentRooms.filterNot { it.isPassable }.size == 3
+//                }.maxByOrNull { it.x + it.y }!! to listOf(presidentFoundEvent),
 
-                // Put the "wide open" event in a wide-open space
-                viableStartingLocations.filter { room -> mazeStateFlow.value.mazeGrid.getAdjacentRooms(room).all { it.isPassable }}.random() to listOf(wideOpenSpaceEvent),
-
-                // Put the passage event in a gap
-                viableStartingLocations.filter{ room -> mazeStateFlow.value.mazeGrid.getAdjacentRooms(room).filter { it.isPassable }.size == 2}.random() to listOf(gapEvent),
-
-                // Put the president in a cul-de-sac
-                viableStartingLocations.filter { room ->
-                    val adjacentRooms = mazeStateFlow.value.mazeGrid.getAdjacentRooms(room)
-                    adjacentRooms.size == 4 && adjacentRooms.filterNot { it.isPassable }.size == 3
-                }.maxByOrNull { it.x + it.y }!! to listOf(presidentFoundEvent)
-            )
+                ) .plus(viableStartingLocations.shuffled().take(150).associateWith { listOf(foodCaches) })
         )
+
+        mazeStateFlow.value.gameEvents.forEach { (k,p) ->
+            println("""room: $k  events : ${p.size} ${p.forEach { _ -> println("\n\t\t$p") }}""")
+        }
+
 
         mazeStateFlow.value = mazeStateFlow.value.updatePlayerPosition(playerStartingRoom)
         mazeRenderedSprite.value = renderMazeSprite()
@@ -148,12 +184,23 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
         recomputeMazeWindowCoordinates()
 
         // Render the background
-        val bg = current.mazeGrid.renderMazeToPixmap(imageWidth, imageHeight, gridWindowX, gridWindowY, gridSquaresPerScreen, roomSize)
+        val bg = current.mazeGrid.renderMazeToPixmap(
+            imageWidth,
+            imageHeight,
+            gridWindowX,
+            gridWindowY,
+            gridSquaresPerScreen,
+            roomSize
+        )
 
         // Render the events as dots on the map
-        current.gameEvents.entries.filter{ it.value.isNotEmpty() }.forEach {
+        current.gameEvents.entries.filter { it.value.isNotEmpty() }.forEach {
             bg.setColor(Color.LIGHT_GRAY)
-            bg.fillCircle(((it.key.x - gridWindowX) * roomSize) + roomSize / 2, ((it.key.y - gridWindowY) * roomSize) + roomSize / 2, roomSize / 4)
+            bg.fillCircle(
+                ((it.key.x - gridWindowX) * roomSize) + roomSize / 2,
+                ((it.key.y - gridWindowY) * roomSize) + roomSize / 2,
+                roomSize / 4
+            )
         }
 
 //        bg.setColor(Color.BLACK.r, Color.BLACK.g, Color.BLACK.b, 0.50f)
@@ -161,9 +208,11 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 //        bg.fillCircle(imageWidth/ 2, imageHeight / 2, 100)
 
         // Render the player sprite
-        bg.drawPixmap(playerSprite,
+        bg.drawPixmap(
+            playerSprite,
             (current.playerPiece.x - gridWindowX) * roomSize + (roomSize / 2) - (playerSprite.width / 2),
-            (current.playerPiece.y - gridWindowY) * roomSize + (roomSize / 2) - (playerSprite.height / 2))
+            (current.playerPiece.y - gridWindowY) * roomSize + (roomSize / 2) - (playerSprite.height / 2)
+        )
 
 
         return Sprite(Texture(bg))
@@ -316,6 +365,7 @@ data class MazeGameState(
     val phase: MazeGamePhase = MazeGamePhase.PLAYER_MOVING,
     val mazeGrid: MazeGrid,
     val playerPiece: PlayerPiece = PlayerPiece(),
+    val foodRemaining: Int = 30,
     val gameEvents: Map<MazeRoom, List<GameEvent>> = mapOf()
 ) {
 
@@ -325,17 +375,24 @@ data class MazeGameState(
 
         val events = gameEvents[newRoom] ?: listOf()
 
-        println("Turn:${turnNumber + 1} / Pos:(${newRoom.x},${newRoom.y})")
+        var newState: MazeGameState = this.copy()
+        val updatedEvents = mutableListOf<GameEvent>()
 
-
-        val updatedEvents = events
+        events
             .sortedBy { it.priority }
-            .map {
-                it.triggerEvent()
+            .forEach { event ->
+                if (event.isActive) {
+                    newState = event.triggerEvent(newState)
+
+                    if (!event.expires) {
+                        updatedEvents.add(event)
+                    }
+                }
             }
 
-        return this.copy(
+        return newState.copy(
             turnNumber = turnNumber + 1,
+            foodRemaining = newState.foodRemaining - 1,
             playerPiece = updatedPlayer,
             gameEvents = gameEvents.plus(newRoom to updatedEvents)
         )

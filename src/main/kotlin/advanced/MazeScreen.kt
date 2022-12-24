@@ -4,6 +4,9 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.utils.ScreenUtils
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 
 /**
@@ -17,6 +20,12 @@ class MazeScreen(private val drop: Drop) : Screen {
     init {
         Gdx.input.inputProcessor = mazeStateManager
         camera.setToOrtho(false, drop.width.toFloat(), drop.height.toFloat())
+
+        mazeStateManager.mazeStateFlow.onEach { event ->
+            println("Turn:${event.turnNumber}  Food: ${event.foodRemaining}  Pos:(${event.playerPiece.x},${event.playerPiece.y})")
+        }.launchIn(GlobalScope)  // FIXME: no!
+
+
     }
 
     override fun show() {

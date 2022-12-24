@@ -54,7 +54,12 @@ class MazeGrid(private val cols: Int, private val rows: Int) {
 
         while (reachable.size != insideMazeRooms.size) {
             frontier.shuffle()
-            val newRoom = frontier.removeAt(0)
+            val newRoom =
+                try {
+                    frontier.removeAt(0)
+                } catch(e: Exception) {
+                    continue
+                }
 
             val adjacentRooms: Set<MazeRoom> = getAdjacentRooms(newRoom).toMutableSet().minus(mazeBorders.toSet())
 
