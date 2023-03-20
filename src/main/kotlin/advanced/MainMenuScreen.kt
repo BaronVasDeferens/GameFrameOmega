@@ -25,10 +25,18 @@ class MainMenuScreen(private val drop: Drop):Screen {
 
         drop.batch.begin()
         drop.batch.draw(logoSprite, 0.0f , 0.0f, drop.width.toFloat(), drop.height.toFloat())
-        drop.font.draw(drop.batch, "press any key to begin", drop.width / 2.0f , drop.height.toFloat() * (1.0f/5.0f))
+        drop.font.draw(drop.batch, "press a for tanks", drop.width / 2.0f , drop.height.toFloat() * (1.0f/5.0f))
+        drop.font.draw(drop.batch, "press b for wanderer", drop.width / 2.0f , drop.height.toFloat() * (1.0f/5.0f) + 20)
+
         drop.batch.end()
 
-        if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY)) {
+
+
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            //drop.screen = MazeScreen(drop)
+            drop.screen = TankGameScreen(drop)
+            dispose()
+        } else if (Gdx.input.isKeyPressed(Input.Keys.B)) {
             drop.screen = MazeScreen(drop)
             dispose()
         }
