@@ -23,6 +23,9 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
     implementation("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-bullet:$gdxVersion")
+    implementation("com.badlogicgames.gdx:gdx-freetype:1.11.0")
+    implementation("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
+
 }
 
 tasks.test {
