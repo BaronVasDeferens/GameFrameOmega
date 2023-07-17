@@ -25,8 +25,8 @@ class MainMenuScreen(private val drop: Drop):Screen {
 
         drop.batch.begin()
         drop.batch.draw(logoSprite, 0.0f , 0.0f, drop.width.toFloat(), drop.height.toFloat())
-        drop.font.draw(drop.batch, "press a for tanks", drop.width / 2.0f , drop.height.toFloat() * (1.0f/5.0f))
-        drop.font.draw(drop.batch, "press b for wanderer", drop.width / 2.0f , drop.height.toFloat() * (1.0f/5.0f) + 20)
+        drop.font.draw(drop.batch, "PRESS A FOR TANKS", 0f, drop.height.toFloat() * (1.0f/5.0f))
+        drop.font.draw(drop.batch, "PRESS B FOR WANDERER", 0f , drop.height.toFloat() * (1.0f/5.0f) + 35)
 
         drop.batch.end()
 
