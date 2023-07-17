@@ -1,0 +1,43 @@
+{
+  "name": "Test 1 Maze",
+  "rows": 2,
+  "cols": 2,
+  "mazeSquares": [
+    {
+      "row": 0,
+      "col": 0,
+      "type": "WALL",
+      "assetName": "src\\main\\resources\\fantasy-tileset.png",
+      "assetCoordinateX": 3,
+      "assetCoordinateY": 2,
+      "assetSize": 32
+    },
+    {
+      "row": 0,
+      "col": 1,
+      "type": "WALL",
+      "assetName": "src\\main\\resources\\fantasy-tileset.png",
+      "assetCoordinateX": 3,
+      "assetCoordinateY": 2,
+      "assetSize": 32
+    },
+    {
+      "row": 1,
+      "col": 0,
+      "type": "WALL",
+      "assetName": "src\\main\\resources\\fantasy-tileset.png",
+      "assetCoordinateX": 3,
+      "assetCoordinateY": 2,
+      "assetSize": 32
+    },
+    {
+      "row": 1,
+      "col": 1,
+      "type": "WALL",
+      "assetName": "src\\main\\resources\\fantasy-tileset.png",
+      "assetCoordinateX": 3,
+      "assetCoordinateY": 2,
+      "assetSize": 32
+    }
+  ]
+}

@@ -18,6 +18,10 @@ dependencies {
     testImplementation(kotlin("test-junit"))
     implementation(kotlin("stdlib-jdk8"))
 
+    // Moshi
+    implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
+    implementation("com.squareup.moshi:moshi-kotlin-codegen:1.14.0")
+
     // LibGDX
     val gdxVersion = "1.11.0"
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
@@ -26,6 +30,8 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-freetype:1.11.0")
     implementation("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
 
+    // Testing
+    testImplementation ("org.junit.jupiter:junit-jupiter:5.9.2")
 }
 
 tasks.test {

@@ -28,7 +28,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 
     // Renderables
     val mazeRenderedSprite = MutableStateFlow<Sprite?>(null)
-    val playerSprite = Pixmap(Gdx.files.internal("wanderer.png"))
+    val playerSprite = Pixmap(Gdx.files.internal("dude2.png"))
 
 
     /**
@@ -159,10 +159,10 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 //                }.random() to listOf(gapEvent),
 //
 //                // Put the president in a cul-de-sac
-//                viableStartingLocations.filter { room ->
-//                    val adjacentRooms = mazeStateFlow.value.mazeGrid.getAdjacentRooms(room)
-//                    adjacentRooms.size == 4 && adjacentRooms.filterNot { it.isPassable }.size == 3
-//                }.maxByOrNull { it.x + it.y }!! to listOf(presidentFoundEvent),
+                viableStartingLocations.filter { room ->
+                    val adjacentRooms = mazeStateFlow.value.mazeGrid.getAdjacentRooms(room)
+                    adjacentRooms.size == 4 && adjacentRooms.filterNot { it.isPassable }.size == 3
+                }.maxByOrNull { it.x + it.y }!! to listOf(presidentFoundEvent),
 
                 ) .plus(viableStartingLocations.shuffled().take(150).associateWith { listOf(foodCaches) })
         )
@@ -208,10 +208,20 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 //        bg.fillCircle(imageWidth/ 2, imageHeight / 2, 100)
 
         // Render the player sprite
+//        bg.drawPixmap(
+//            playerSprite,
+//            (current.playerPiece.x - gridWindowX) * roomSize + (roomSize / 2) - (playerSprite.width / 2),
+//            (current.playerPiece.y - gridWindowY) * roomSize + (roomSize / 2) - (playerSprite.height / 2)
+//        )
+
         bg.drawPixmap(
             playerSprite,
-            (current.playerPiece.x - gridWindowX) * roomSize + (roomSize / 2) - (playerSprite.width / 2),
-            (current.playerPiece.y - gridWindowY) * roomSize + (roomSize / 2) - (playerSprite.height / 2)
+            (current.playerPiece.x - gridWindowX) * roomSize + (roomSize / 2) - 12,
+            (current.playerPiece.y - gridWindowY) * roomSize + (roomSize / 2) - 12,
+            75,
+            0,
+            25,
+            25
         )
 
 
