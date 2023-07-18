@@ -1,43 +1,52 @@
 {
   "name": "Test 1 Maze",
-  "rows": 2,
-  "cols": 2,
+  "rows": 3,
+  "cols": 3,
   "mazeSquares": [
     {
       "row": 0,
       "col": 0,
-      "type": "WALL",
-      "assetName": "src\\main\\resources\\fantasy-tileset.png",
-      "assetCoordinateX": 3,
-      "assetCoordinateY": 2,
-      "assetSize": 32
+      "type": "WALL"
     },
     {
       "row": 0,
       "col": 1,
-      "type": "WALL",
-      "assetName": "src\\main\\resources\\fantasy-tileset.png",
-      "assetCoordinateX": 3,
-      "assetCoordinateY": 2,
-      "assetSize": 32
+      "type": "WALL"
+    },
+    {
+      "row": 0,
+      "col": 2,
+      "type": "WALL"
     },
     {
       "row": 1,
       "col": 0,
-      "type": "WALL",
-      "assetName": "src\\main\\resources\\fantasy-tileset.png",
-      "assetCoordinateX": 3,
-      "assetCoordinateY": 2,
-      "assetSize": 32
+      "type": "WALL"
     },
     {
       "row": 1,
       "col": 1,
-      "type": "WALL",
-      "assetName": "src\\main\\resources\\fantasy-tileset.png",
-      "assetCoordinateX": 3,
-      "assetCoordinateY": 2,
-      "assetSize": 32
+      "type": "FLOOR"
+    },
+    {
+      "row": 1,
+      "col": 2,
+      "type": "WALL"
+    },
+    {
+      "row": 2,
+      "col": 0,
+      "type": "WALL"
+    },
+    {
+      "row": 2,
+      "col": 1,
+      "type": "WALL"
+    },
+    {
+      "row": 2,
+      "col": 2,
+      "type": "WALL"
     }
   ]
 }

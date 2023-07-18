@@ -11,45 +11,54 @@ class MazeMapTest {
     fun `should save and load maps`() {
         val mazeMap = MazeMap(
             name = "Test 1 Maze",
-            rows = 2,
-            cols = 2,
+            rows = 3,
+            cols = 3,
             mazeSquares = listOf(
                 MazeSquare(
                     row = 0,
                     col = 0,
                     type = MazeSquareType.WALL,
-                    assetName = "src\\main\\resources\\fantasy-tileset.png",
-                    assetCoordinateX = 3,
-                    assetCoordinateY = 2,
-                    assetSize = 32
                 ),
                 MazeSquare(
                     row = 0,
                     col = 1,
                     type = MazeSquareType.WALL,
-                    assetName = "src\\main\\resources\\fantasy-tileset.png",
-                    assetCoordinateX = 3,
-                    assetCoordinateY = 2,
-                    assetSize = 32
+                ),
+                MazeSquare(
+                    row = 0,
+                    col = 2,
+                    type = MazeSquareType.WALL,
                 ),
                 MazeSquare(
                     row = 1,
                     col = 0,
                     type = MazeSquareType.WALL,
-                    assetName = "src\\main\\resources\\fantasy-tileset.png",
-                    assetCoordinateX = 3,
-                    assetCoordinateY = 2,
-                    assetSize = 32
                 ),
                 MazeSquare(
                     row = 1,
                     col = 1,
+                    type = MazeSquareType.FLOOR,
+                ),
+                MazeSquare(
+                    row = 1,
+                    col = 2,
                     type = MazeSquareType.WALL,
-                    assetName = "src\\main\\resources\\fantasy-tileset.png",
-                    assetCoordinateX = 3,
-                    assetCoordinateY = 2,
-                    assetSize = 32
-                )
+                ),
+                MazeSquare(
+                    row = 2,
+                    col = 0,
+                    type = MazeSquareType.WALL,
+                ),
+                MazeSquare(
+                    row = 2,
+                    col = 1,
+                    type = MazeSquareType.WALL,
+                ),
+                MazeSquare(
+                    row = 2,
+                    col = 2,
+                    type = MazeSquareType.WALL,
+                ),
             )
         )
 
@@ -60,7 +69,7 @@ class MazeMapTest {
     @Test
     fun `should save image to disk`() {
         val mazeMap = MazeMapUtility.loadMapFromFile("src\\test\\resources\\maze_1.json")
-        val image = MazeMapUtility.renderMazeToBufferedImage(64, 64, mazeMap)
+        val image = MazeMapUtility.renderMazeToBufferedImage(mazeMap)
         MazeMapUtility.saveImageToDisk(image, "maze.png")
     }
 
