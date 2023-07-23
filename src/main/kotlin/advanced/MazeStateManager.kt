@@ -20,8 +20,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
     private var gridWindowX = 0
     private var gridWindowY = 0
 
-    private var roomSize: Int =
-        100 // listOf((imageWidth / gridSquaresPerScreen), (imageHeight / gridSquaresPerScreen)).minOf { it }
+    private var roomSize: Int = listOf((imageWidth / gridSquaresPerScreen), (imageHeight / gridSquaresPerScreen)).minOf { it }
 
 
     val mazeStateFlow = MutableStateFlow(MazeGameState(mazeGrid = MazeGrid(rows, cols)))

@@ -125,5 +125,6 @@ object MazeMapUtility {
             outputFile.createNewFile()
         }
         ImageIO.write(image, "png", outputFile)
+        println("Saved ${outputFile.absolutePath}")
     }
 }
