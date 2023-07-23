@@ -22,7 +22,7 @@ class MazeScreen(private val drop: Drop) : Screen {
         camera.setToOrtho(false, drop.width.toFloat(), drop.height.toFloat())
 
         mazeStateManager.mazeStateFlow.onEach { event ->
-            println("Turn:${event.turnNumber}  Food: ${event.foodRemaining}  Pos:(${event.playerPiece.x},${event.playerPiece.y})")
+            println("Turn:${event.turnNumber}  Pos:(${event.playerPiece.x},${event.playerPiece.y})")
         }.launchIn(GlobalScope)  // FIXME: no!
 
 

@@ -124,13 +124,13 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 
         }
 
-        val foodCaches = GameEvent(GameEventType.FLAVOR_TEXT, 2, true) { gameState ->
-            beep.stop()
-            beep.framePosition = 0
-            beep.start()
-            println("""You have found a food cache!""")
-            gameState.copy(foodRemaining = gameState.foodRemaining + 5)
-        }
+//        val foodCaches = GameEvent(GameEventType.FLAVOR_TEXT, 2, true) { gameState ->
+//            beep.stop()
+//            beep.framePosition = 0
+//            beep.start()
+//            println("""You have found a food cache!""")
+//            gameState.copy(foodRemaining = gameState.foodRemaining + 5)
+//        }
 
 
         viableStartingLocations.shuffled()
@@ -163,7 +163,8 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
                     adjacentRooms.size == 4 && adjacentRooms.filterNot { it.isPassable }.size == 3
                 }.maxByOrNull { it.x + it.y }!! to listOf(presidentFoundEvent),
 
-                ) .plus(viableStartingLocations.shuffled().take(150).associateWith { listOf(foodCaches) })
+                )
+                // .plus(viableStartingLocations.shuffled().take(150).associateWith { listOf(foodCaches) })
         )
 
         mazeStateFlow.value.gameEvents.forEach { (k,p) ->
@@ -374,7 +375,6 @@ data class MazeGameState(
     val phase: MazeGamePhase = MazeGamePhase.PLAYER_MOVING,
     val mazeGrid: MazeGrid,
     val playerPiece: PlayerPiece = PlayerPiece(),
-    val foodRemaining: Int = 30,
     val gameEvents: Map<MazeRoom, List<GameEvent>> = mapOf()
 ) {
 
@@ -401,7 +401,6 @@ data class MazeGameState(
 
         return newState.copy(
             turnNumber = turnNumber + 1,
-            foodRemaining = newState.foodRemaining - 1,
             playerPiece = updatedPlayer,
             gameEvents = gameEvents.plus(newRoom to updatedEvents)
         )
