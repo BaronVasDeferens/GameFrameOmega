@@ -3,6 +3,8 @@ package advanced
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.InputProcessor
+import com.badlogic.gdx.assets.loaders.SoundLoader
+import com.badlogic.gdx.backends.lwjgl3.audio.Wav.Sound
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
@@ -20,15 +22,20 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
     private var gridWindowX = 0
     private var gridWindowY = 0
 
-    private var roomSize: Int = listOf((imageWidth / gridSquaresPerScreen), (imageHeight / gridSquaresPerScreen)).minOf { it }
-
+    private var roomSize: Int =
+        listOf((imageWidth / gridSquaresPerScreen), (imageHeight / gridSquaresPerScreen)).minOf { it }
 
     val mazeStateFlow = MutableStateFlow(MazeGameState(mazeGrid = MazeGrid(rows, cols)))
 
     // Renderables
     val mazeRenderedSprite = MutableStateFlow<Sprite?>(null)
-    val playerSprite = Pixmap(Gdx.files.internal("dude2.png"))
+    private val playerSprite = Pixmap(Gdx.files.internal("guy_1.png"))
+    val playerSpriteSize = 50
+    private val enemySprite = Pixmap(Gdx.files.internal("blob_1.png"))
+    val enemySpriteSize = 50
 
+
+    private val music = Gdx.audio.newMusic(Gdx.files.internal("wanderer - horror.wav"))
 
     /**
      *
@@ -39,6 +46,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
      */
     init {
         reinitializeMazeGameState()
+        music.play()
     }
 
     private fun reinitializeMazeGameState() {
@@ -135,14 +143,13 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 
         viableStartingLocations.shuffled()
 
-        mazeStateFlow.value = mazeStateFlow.value.copy(
-            gameEvents = mapOf(
+        val gameEvents = mapOf(
 
-                // Starting position for player
-                playerStartingRoom to listOf(
-                    doorClosesIntroEvent,
-                    garbageEvent
-                ),
+            // Starting position for player
+            playerStartingRoom to listOf(
+                doorClosesIntroEvent,
+                garbageEvent
+            ),
 
 //                // Put the animal skeleton in some random room
 //                viableStartingLocations.removeAt(0)  to listOf(somewhereEvent),
@@ -158,16 +165,29 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 //                }.random() to listOf(gapEvent),
 //
 //                // Put the president in a cul-de-sac
-                viableStartingLocations.filter { room ->
-                    val adjacentRooms = mazeStateFlow.value.mazeGrid.getAdjacentRooms(room)
-                    adjacentRooms.size == 4 && adjacentRooms.filterNot { it.isPassable }.size == 3
-                }.maxByOrNull { it.x + it.y }!! to listOf(presidentFoundEvent),
+            viableStartingLocations.filter { room ->
+                val adjacentRooms = mazeStateFlow.value.mazeGrid.getAdjacentRooms(room)
+                adjacentRooms.size == 4 && adjacentRooms.filterNot { it.isPassable }.size == 3
+            }.maxByOrNull { it.x + it.y }!! to listOf(presidentFoundEvent),
 
-                )
-                // .plus(viableStartingLocations.shuffled().take(150).associateWith { listOf(foodCaches) })
+            )
+        // .plus(viableStartingLocations.shuffled().take(150).associateWith { listOf(foodCaches) })
+
+
+        val enemies: List<EntityBasic> = mazeStateFlow.value.mazeGrid.getRooms()
+            .filter { it.isPassable }
+            .shuffled()
+            .take(100)
+            .map { room ->
+                EntityBasic(room.x, room.y)
+            }
+
+        mazeStateFlow.value = mazeStateFlow.value.copy(
+            gameEvents = gameEvents,
+            enemies = enemies
         )
 
-        mazeStateFlow.value.gameEvents.forEach { (k,p) ->
+        mazeStateFlow.value.gameEvents.forEach { (k, p) ->
             println("""room: $k  events : ${p.size} ${p.forEach { _ -> println("\n\t\t$p") }}""")
         }
 
@@ -203,6 +223,22 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             )
         }
 
+        current.enemies.forEach { enemy ->
+            if ((enemy.x >= gridWindowX) && (enemy.x <= gridWindowX + gridSquaresPerScreen)) {
+                if ((enemy.y >= gridWindowY) && (enemy.y <= gridWindowY + gridSquaresPerScreen)) {
+                    bg.drawPixmap(
+                        enemySprite,
+                        (enemy.x - gridWindowX) * roomSize + (roomSize / 2) - enemySpriteSize / 2,
+                        (enemy.y - gridWindowY) * roomSize + (roomSize / 2) - enemySpriteSize / 2,
+                        0,
+                        0,
+                        enemySpriteSize,
+                        enemySpriteSize
+                    )
+                }
+            }
+        }
+
 //        bg.setColor(Color.BLACK.r, Color.BLACK.g, Color.BLACK.b, 0.50f)
 //        bg.blending = Pixmap.Blending.SourceOver
 //        bg.fillCircle(imageWidth/ 2, imageHeight / 2, 100)
@@ -216,12 +252,12 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 
         bg.drawPixmap(
             playerSprite,
-            (current.playerPiece.x - gridWindowX) * roomSize + (roomSize / 2) - 12,
-            (current.playerPiece.y - gridWindowY) * roomSize + (roomSize / 2) - 12,
-            75,
+            (current.entityBasic.x - gridWindowX) * roomSize + (roomSize / 2) - (playerSpriteSize /  2),
+            (current.entityBasic.y - gridWindowY) * roomSize + (roomSize / 2) - (playerSpriteSize /  2),
             0,
-            25,
-            25
+            0,
+            playerSpriteSize,
+            playerSpriteSize
         )
 
 
@@ -238,7 +274,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             Keys.UP,
             Keys.W -> {
                 // Move UP
-                mazeStateFlow.value.mazeGrid.getRoom(current.playerPiece.x, current.playerPiece.y - 1)?.takeIf {
+                mazeStateFlow.value.mazeGrid.getRoom(current.entityBasic.x, current.entityBasic.y - 1)?.takeIf {
                     it.isPassable
                 }?.apply {
                     mazeStateFlow.value = current.updatePlayerPosition(this)
@@ -248,7 +284,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             // Move DOWN
             Keys.DOWN,
             Keys.S -> {
-                mazeStateFlow.value.mazeGrid.getRoom(current.playerPiece.x, current.playerPiece.y + 1)?.takeIf {
+                mazeStateFlow.value.mazeGrid.getRoom(current.entityBasic.x, current.entityBasic.y + 1)?.takeIf {
                     it.isPassable
                 }?.apply {
                     mazeStateFlow.value = current.updatePlayerPosition(this)
@@ -258,7 +294,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             // Move LEFT
             Keys.LEFT,
             Keys.A -> {
-                mazeStateFlow.value.mazeGrid.getRoom(current.playerPiece.x - 1, current.playerPiece.y)?.takeIf {
+                mazeStateFlow.value.mazeGrid.getRoom(current.entityBasic.x - 1, current.entityBasic.y)?.takeIf {
                     it.isPassable
                 }?.apply {
                     mazeStateFlow.value = current.updatePlayerPosition(this)
@@ -268,7 +304,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             // Move RIGHT
             Keys.RIGHT,
             Keys.D -> {
-                mazeStateFlow.value.mazeGrid.getRoom(current.playerPiece.x + 1, current.playerPiece.y)?.takeIf {
+                mazeStateFlow.value.mazeGrid.getRoom(current.entityBasic.x + 1, current.entityBasic.y)?.takeIf {
                     it.isPassable
                 }?.apply {
                     mazeStateFlow.value = current.updatePlayerPosition(this)
@@ -346,8 +382,8 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
     private fun recomputeMazeWindowCoordinates() {
 
         val current = mazeStateFlow.value
-        val pX = current.playerPiece.x
-        val pY = current.playerPiece.y
+        val pX = current.entityBasic.x
+        val pY = current.entityBasic.y
 
         gridWindowX = pX - (gridSquaresPerScreen / 2 - 1)
         if (gridWindowX < 0) {
@@ -370,48 +406,3 @@ enum class MazeGamePhase {
     DISPLAY_OVERLAY
 }
 
-data class MazeGameState(
-    val turnNumber: Int = 1,
-    val phase: MazeGamePhase = MazeGamePhase.PLAYER_MOVING,
-    val mazeGrid: MazeGrid,
-    val playerPiece: PlayerPiece = PlayerPiece(),
-    val gameEvents: Map<MazeRoom, List<GameEvent>> = mapOf()
-) {
-
-
-    fun updatePlayerPosition(newRoom: MazeRoom): MazeGameState {
-        val updatedPlayer = playerPiece.updatePosition(newRoom)
-
-        val events = gameEvents[newRoom] ?: listOf()
-
-        var newState: MazeGameState = this.copy()
-        val updatedEvents = mutableListOf<GameEvent>()
-
-        events
-            .sortedBy { it.priority }
-            .forEach { event ->
-                if (event.isActive) {
-                    newState = event.triggerEvent(newState)
-
-                    if (!event.expires) {
-                        updatedEvents.add(event)
-                    }
-                }
-            }
-
-        return newState.copy(
-            turnNumber = turnNumber + 1,
-            playerPiece = updatedPlayer,
-            gameEvents = gameEvents.plus(newRoom to updatedEvents)
-        )
-    }
-
-}
-
-data class PlayerPiece(val x: Int = 1, val y: Int = 1) {
-
-    fun updatePosition(room: MazeRoom): PlayerPiece {
-        return this.copy(x = room.x, y = room.y)
-    }
-
-}
