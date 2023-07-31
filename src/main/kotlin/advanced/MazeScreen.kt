@@ -33,11 +33,12 @@ class MazeScreen(private val drop: Drop) : Screen {
     }
 
     override fun render(delta: Float) {
+
         ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
         drop.batch.setProjectionMatrix(camera.combined)
         drop.batch.begin()
 
-        mazeStateManager.mazeRenderedSprite.value?.apply {
+        mazeStateManager.renderedSpriteFlow.value?.apply {
             draw(drop.batch)
         }
 

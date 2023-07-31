@@ -16,12 +16,15 @@ class Drop(val width: Int, val height: Int) : Game() {
 
     override fun create() {
         batch = SpriteBatch()
+
+        // Set the silly C64 font
         val file = Gdx.files.internal("commodore.ttf")
         val generator = FreeTypeFontGenerator(file)
         val parameter = FreeTypeFontParameter()
         parameter.size = 35
         font = generator.generateFont(parameter)
         generator.dispose()
+
         this.setScreen(MainMenuScreen(this))
     }
 

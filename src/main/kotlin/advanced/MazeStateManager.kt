@@ -3,8 +3,6 @@ package advanced
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.InputProcessor
-import com.badlogic.gdx.assets.loaders.SoundLoader
-import com.badlogic.gdx.backends.lwjgl3.audio.Wav.Sound
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
@@ -28,7 +26,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
     val mazeStateFlow = MutableStateFlow(MazeGameState(mazeGrid = MazeGrid(rows, cols)))
 
     // Renderables
-    val mazeRenderedSprite = MutableStateFlow<Sprite?>(null)
+    val renderedSpriteFlow = MutableStateFlow<Sprite?>(null)
     private val playerSprite = Pixmap(Gdx.files.internal("guy_1.png"))
     val playerSpriteSize = 50
     private val enemySprite = Pixmap(Gdx.files.internal("blob_1.png"))
@@ -193,7 +191,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
 
 
         mazeStateFlow.value = mazeStateFlow.value.updatePlayerPosition(playerStartingRoom)
-        mazeRenderedSprite.value = renderMazeSprite()
+        renderedSpriteFlow.value = renderMazeSprite()
     }
 
 
@@ -321,7 +319,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             Keys.EQUALS -> {
                 roomSize += 10
                 println("INCREASING ROOM SIZE: $roomSize")
-                mazeRenderedSprite.value = renderMazeSprite()
+                renderedSpriteFlow.value = renderMazeSprite()
             }
 
             // DEBUG: Decrease room size
@@ -329,7 +327,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             Keys.MINUS -> {
                 roomSize -= 10
                 println("DECREASING ROOM SIZE: $roomSize")
-                mazeRenderedSprite.value = renderMazeSprite()
+                renderedSpriteFlow.value = renderMazeSprite()
             }
 
             // QUIT
@@ -342,7 +340,7 @@ class MazeStateManager(val imageWidth: Int, val imageHeight: Int, val rows: Int,
             }
         }
 
-        mazeRenderedSprite.value = renderMazeSprite()
+        renderedSpriteFlow.value = renderMazeSprite()
         return true
     }
 
