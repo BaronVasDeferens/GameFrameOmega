@@ -26,7 +26,8 @@ class MainMenuScreen(private val drop: Drop):Screen {
         drop.batch.begin()
         drop.batch.draw(logoSprite, 0.0f , 0.0f, drop.width.toFloat(), drop.height.toFloat())
         drop.font.draw(drop.batch, "PRESS A FOR TANKS", 0f, drop.height.toFloat() * (1.0f/5.0f))
-        drop.font.draw(drop.batch, "PRESS B FOR WANDERER", 0f , drop.height.toFloat() * (1.0f/5.0f) + 35)
+        drop.font.draw(drop.batch, "PRESS B FOR WANDERER", 0f , drop.height.toFloat() * (1.0f/5.0f) - 35)
+        drop.font.draw(drop.batch, "PRESS C FOR TEST", 0f , drop.height.toFloat() * (1.0f/5.0f) - 70)
 
         drop.batch.end()
 
@@ -39,6 +40,8 @@ class MainMenuScreen(private val drop: Drop):Screen {
         } else if (Gdx.input.isKeyPressed(Input.Keys.B)) {
             drop.screen = MazeScreen(drop)
             dispose()
+        } else if (Gdx.input.isKeyPressed(Input.Keys.C)) {
+            drop.screen = TestScreen(drop)
         }
     }
 

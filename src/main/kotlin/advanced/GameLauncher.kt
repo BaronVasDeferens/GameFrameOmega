@@ -27,7 +27,6 @@ object GameLauncher {
             }
 
             override fun focusLost() {
-
             }
 
             override fun focusGained() {

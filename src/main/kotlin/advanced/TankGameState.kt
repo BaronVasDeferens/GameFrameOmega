@@ -87,9 +87,13 @@ class TankGameStateManager(val width: Int = 1600, val height: Int = 1200) : Inpu
             gamePhase = GamePhase.IN_PLAY,
             entities = (1..100)
                 .map {
-                    Robot(textureMap[ImageType.ROBOT]!!, Random.nextInt(width).toFloat(), Random.nextInt(height).toFloat())
+                    Robot(
+                        textureMap[ImageType.ROBOT]!!,
+                        Random.nextInt(width).toFloat(),
+                        Random.nextInt(height).toFloat()
+                    )
                 }.toList(),
-            tankPlayer = Tank(textureMap[ImageType.TANK_BODY]!!,textureMap[ImageType.TANK_TURRET]!!, 300.0f, 300.0f)
+            tankPlayer = Tank(textureMap[ImageType.TANK_BODY]!!, textureMap[ImageType.TANK_TURRET]!!, 300.0f, 300.0f)
         )
     )
 
@@ -129,37 +133,45 @@ class TankGameStateManager(val width: Int = 1600, val height: Int = 1200) : Inpu
 
             // Body
             Input.Keys.Q -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.LEFT_TREAD_FWD))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.LEFT_TREAD_FWD))
             }
 
             Input.Keys.A -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.LEFT_TREAD_BACK))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.LEFT_TREAD_BACK))
             }
 
             Input.Keys.E -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.RIGHT_TREAD_FWD))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.RIGHT_TREAD_FWD))
             }
 
             Input.Keys.D -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.RIGHT_TREAD_BACK))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.RIGHT_TREAD_BACK))
             }
 
             // Main gun
             Input.Keys.SPACE -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.PRIMARY_FIRE))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.PRIMARY_FIRE))
             }
 
             // Turret
             Input.Keys.J -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.TURRET_ROTATE_LEFT))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.TURRET_ROTATE_LEFT))
             }
 
             Input.Keys.L -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.TURRET_ROTATE_RIGHT))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.TURRET_ROTATE_RIGHT))
             }
 
             Input.Keys.K -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.SECONDARY_FIRE))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.plus(KeyboardInput.SECONDARY_FIRE))
             }
 
             else -> {
@@ -172,23 +184,27 @@ class TankGameStateManager(val width: Int = 1600, val height: Int = 1200) : Inpu
     override fun keyUp(keycode: Int): Boolean {
 
         val state = tankGameStateFlow.value
-        when(keycode){
+        when (keycode) {
 
             // Body
             Input.Keys.Q -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.LEFT_TREAD_FWD))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.LEFT_TREAD_FWD))
             }
 
             Input.Keys.A -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.LEFT_TREAD_BACK))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.LEFT_TREAD_BACK))
             }
 
             Input.Keys.E -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.RIGHT_TREAD_FWD))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.RIGHT_TREAD_FWD))
             }
 
             Input.Keys.D -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.RIGHT_TREAD_BACK))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.RIGHT_TREAD_BACK))
             }
 
             // Main gun
@@ -198,15 +214,18 @@ class TankGameStateManager(val width: Int = 1600, val height: Int = 1200) : Inpu
 
             // Turret
             Input.Keys.J -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.TURRET_ROTATE_LEFT))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.TURRET_ROTATE_LEFT))
             }
 
             Input.Keys.L -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.TURRET_ROTATE_RIGHT))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.TURRET_ROTATE_RIGHT))
             }
 
             Input.Keys.K -> {
-                tankGameStateFlow.value = tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.SECONDARY_FIRE))
+                tankGameStateFlow.value =
+                    tankGameStateFlow.value.copy(inputs = state.inputs.minus(KeyboardInput.SECONDARY_FIRE))
             }
 
 
@@ -222,7 +241,11 @@ class TankGameStateManager(val width: Int = 1600, val height: Int = 1200) : Inpu
         val state = tankGameStateFlow.value
         when (state.gamePhase) {
             GamePhase.IN_PLAY -> {
-                val robot = Robot(Texture(Gdx.files.internal("robot_basic.png")), state.mouseX.toFloat(), state.mouseY.toFloat())
+                val robot = Robot(
+                    Texture(Gdx.files.internal("robot_basic.png")),
+                    state.mouseX.toFloat(),
+                    state.mouseY.toFloat()
+                )
                 tankGameStateFlow.value = state.copy(entities = state.entities.plus(robot))
                 println(">>> total entities: ${tankGameStateFlow.value.entities.size}")
             }
