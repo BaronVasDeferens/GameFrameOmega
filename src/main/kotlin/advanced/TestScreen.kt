@@ -23,12 +23,9 @@ class TestScreen(private val drop: Drop) : Screen {
     private val frameCounter = FrameCounter()
     private val renderer = Renderer(drop.width, drop.height)
 
-    private val camera = OrthographicCamera()
-
-
-
     private var playerEntity = GameEntity(type = GameEntityType.PLAYER)
 
+    private val camera = OrthographicCamera()
 
     init {
         Gdx.input.inputProcessor = keyboardInputProcessor
