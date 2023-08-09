@@ -17,13 +17,14 @@ import kotlin.system.exitProcess
 
 class TestScreen(private val drop: Drop) : Screen {
 
-    val playerInputQueue = MutableStateFlow(setOf(MovementDirection.NOT_MOVING))
+    private val playerInputQueue = MutableStateFlow(setOf(MovementDirection.NOT_MOVING))
 
-
-    private val camera = OrthographicCamera()
     private val keyboardInputProcessor = KeyboardInputProcessor(playerInputQueue)
     private val frameCounter = FrameCounter()
     private val renderer = Renderer(drop.width, drop.height)
+
+    private val camera = OrthographicCamera()
+
 
 
     private var playerEntity = GameEntity(type = GameEntityType.PLAYER)
@@ -32,8 +33,6 @@ class TestScreen(private val drop: Drop) : Screen {
     init {
         Gdx.input.inputProcessor = keyboardInputProcessor
         camera.setToOrtho(false, drop.width.toFloat(), drop.height.toFloat())
-
-
     }
 
 
@@ -48,11 +47,12 @@ class TestScreen(private val drop: Drop) : Screen {
 
         playerEntity.setDirection(playerInputQueue.value.first())
         playerEntity.update()
+
         val render = playerEntity.getRender()
         drop.batch.draw(
             render.texture,
-            render.x.toFloat(),
-            render.y.toFloat()
+            render.x,
+            render.y
         )
 
 
@@ -105,7 +105,7 @@ class FrameCounter(
 
 class Renderer(val width: Int, val height: Int) {
 
-    private lateinit var sprite: Sprite
+    private var sprite: Sprite
 
     init {
         val pixmap = Pixmap(width, height, Pixmap.Format.RGBA4444)
@@ -132,14 +132,14 @@ enum class GameEntityType {
     ENEMY
 }
 
-class GameEntity(val type: GameEntityType, var x: Int = 0, var y: Int = 0) {
+class GameEntity(val type: GameEntityType, var x: Float = 0.0f, var y: Float = 0.0f) {
 
     private var direction: MovementDirection = MovementDirection.NOT_MOVING
     private var currentTick: Int = 0
     private var currentIndex: Int = 0
     private val ticksPerFrame = 10
 
-    private val movementDelta = 2
+    private val movementDelta = 0.75f
 
     private val spriteSheet = when (type) {
         GameEntityType.PLAYER -> {
@@ -147,7 +147,7 @@ class GameEntity(val type: GameEntityType, var x: Int = 0, var y: Int = 0) {
         }
 
         else -> {
-            Spritesheet("robot_basic_sprite_sheet.png", 1, 4, 64, 64)
+            Spritesheet("blob_strip_2.png", 1, 4, 50, 50)
         }
     }
 
@@ -221,8 +221,8 @@ enum class MovementDirection(val deltaX: Int, val deltaY: Int) {
 
 data class RenderDirective(
     val texture: TextureRegion,
-    val x: Int,
-    val y: Int
+    val x: Float,
+    val y: Float
 )
 
 
