@@ -11,16 +11,13 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.ScreenUtils
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlin.random.Random
 import kotlin.system.exitProcess
 
 class TestScreen(private val drop: Drop) : Screen {
 
-    val playerInputQueue = MutableStateFlow<Set<MovementDirection>>(setOf(MovementDirection.NOT_MOVING))
+    val playerInputQueue = MutableStateFlow(setOf(MovementDirection.NOT_MOVING))
 
 
     private val camera = OrthographicCamera()
@@ -28,9 +25,8 @@ class TestScreen(private val drop: Drop) : Screen {
     private val frameCounter = FrameCounter()
     private val renderer = Renderer(drop.width, drop.height)
 
-    private val animationDirectives = MutableStateFlow<List<MovementDirective>>(listOf())
 
-    private val playerEntity = GameEntity(type = GameEntityType.PLAYER)
+    private var playerEntity = GameEntity(type = GameEntityType.PLAYER)
 
 
     init {
@@ -38,41 +34,27 @@ class TestScreen(private val drop: Drop) : Screen {
         camera.setToOrtho(false, drop.width.toFloat(), drop.height.toFloat())
 
 
-        playerInputQueue.onEach { inputs ->
-            inputs.map { input ->
-                animationDirectives.value = animationDirectives.value.plus(
-                    MovementDirective(playerEntity, input, 1, 20)
-                )
-            }
-        }.launchIn(GlobalScope)
-
-        frameCounter.frameCountFlow.onEach { count ->
-            animationDirectives.value = animationDirectives.value.filter { it.isAlive() }
-        }.launchIn(GlobalScope)
-
-
     }
 
 
     override fun render(delta: Float) {
         frameCounter.update(delta)
+
         ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
         drop.batch.projectionMatrix = camera.combined
         drop.batch.begin()
 
         renderer.render().draw(drop.batch)
 
-        animationDirectives.value.forEach { directive ->
-            directive.update()
-            val texture = directive.getTexture()
-            val coordinates = directive.getCoordinates()
+        playerEntity.setDirection(playerInputQueue.value.first())
+        playerEntity.update()
+        val render = playerEntity.getRender()
+        drop.batch.draw(
+            render.texture,
+            render.x.toFloat(),
+            render.y.toFloat()
+        )
 
-            drop.batch.draw(
-                texture,
-                coordinates.first.toFloat(),
-                coordinates.second.toFloat()
-            )
-        }
 
         drop.batch.end()
     }
@@ -152,6 +134,13 @@ enum class GameEntityType {
 
 class GameEntity(val type: GameEntityType, var x: Int = 0, var y: Int = 0) {
 
+    private var direction: MovementDirection = MovementDirection.NOT_MOVING
+    private var currentTick: Int = 0
+    private var currentIndex: Int = 0
+    private val ticksPerFrame = 10
+
+    private val movementDelta = 2
+
     private val spriteSheet = when (type) {
         GameEntityType.PLAYER -> {
             Spritesheet("robot_basic_sprite_sheet.png", 1, 4, 64, 64)
@@ -162,16 +151,48 @@ class GameEntity(val type: GameEntityType, var x: Int = 0, var y: Int = 0) {
         }
     }
 
-    fun getTextureAtIndex(index: Int): TextureRegion {
-        return spriteSheet.getTextureAtIndex(index)
+    fun setDirection(newDirection: MovementDirection) {
+        direction = newDirection
+        if (direction == MovementDirection.NOT_MOVING) {
+            currentIndex = 0
+        }
     }
 
+    fun update() {
+
+        currentTick += 1
+
+        if (direction != MovementDirection.NOT_MOVING) {
+            if (currentTick >= ticksPerFrame) {
+                currentTick = 0
+                currentIndex = (currentIndex + 1) % spriteSheet.indexMax
+            }
+
+            x += (direction.deltaX * movementDelta)
+            y += (direction.deltaY * movementDelta)
+        }
+
+
+
+    }
+
+    fun getRender(): RenderDirective {
+        return RenderDirective(
+            texture = getTextureAtIndex(currentIndex),
+            x = x,
+            y = y
+        )
+    }
+
+    private fun getTextureAtIndex(index: Int): TextureRegion {
+        return spriteSheet.getTextureAtIndex(index)
+    }
 }
 
 class Spritesheet(fileName: String, rows: Int, columns: Int, cellWidth: Int, cellHeight: Int) {
 
     private val textureRegions = mutableListOf<TextureRegion>()
-    val indexMax get() = textureRegions.size - 1
+    val indexMax get() = textureRegions.size
 
     init {
         val masterTexture = Texture(Gdx.files.internal(fileName))
@@ -198,54 +219,39 @@ enum class MovementDirection(val deltaX: Int, val deltaY: Int) {
     MOVING_DOWN(0, -1)
 }
 
-data class MovementDirective(
-    val entity: GameEntity,
-    val direction: MovementDirection,
-    val pixelsPerTick: Int,
-    val ticksMax: Int
-) {
+data class RenderDirective(
+    val texture: TextureRegion,
+    val x: Int,
+    val y: Int
+)
 
-    private var tickCurrent: Int = 0
-    private var isActive = true
-
-    fun update() {
-        tickCurrent++
-        if (!isAlive()) {
-            if (isActive) {
-                entity.x = entity.x + (ticksMax * pixelsPerTick * direction.deltaX)
-                entity.y = entity.y + (ticksMax * pixelsPerTick * direction.deltaY)
-            }
-            isActive = false
-        }
-    }
-
-    fun getTexture(): TextureRegion {
-        return entity.getTextureAtIndex(0)
-    }
-
-    fun getCoordinates(): Pair<Int, Int> {
-        return Pair(
-            (entity.x + ((tickCurrent * pixelsPerTick) * direction.deltaX)),
-            ((entity.y + (tickCurrent * pixelsPerTick)) * direction.deltaY)
-        )
-    }
-
-    fun isAlive(): Boolean {
-        return tickCurrent < ticksMax
-    }
-
-}
 
 class KeyboardInputProcessor(val playerInputQueue: MutableStateFlow<Set<MovementDirection>>) : InputProcessor {
     override fun keyDown(keycode: Int): Boolean {
         when (keycode) {
 
+            Input.Keys.W -> {
+                playerInputQueue.value = playerInputQueue.value
+                    .minus(MovementDirection.NOT_MOVING)
+                    .plus(MovementDirection.MOVING_UP)
+            }
+
+            Input.Keys.S -> {
+                playerInputQueue.value = playerInputQueue.value
+                    .minus(MovementDirection.NOT_MOVING)
+                    .plus(MovementDirection.MOVING_DOWN)
+            }
+
             Input.Keys.A -> {
-                playerInputQueue.value = playerInputQueue.value.plus(MovementDirection.MOVING_LEFT)
+                playerInputQueue.value = playerInputQueue.value
+                    .minus(MovementDirection.NOT_MOVING)
+                    .plus(MovementDirection.MOVING_LEFT)
             }
 
             Input.Keys.D -> {
-                playerInputQueue.value = playerInputQueue.value.plus(MovementDirection.MOVING_RIGHT)
+                playerInputQueue.value = playerInputQueue.value
+                    .minus(MovementDirection.NOT_MOVING)
+                    .plus(MovementDirection.MOVING_RIGHT)
             }
 
             Input.Keys.ESCAPE -> {
@@ -258,12 +264,30 @@ class KeyboardInputProcessor(val playerInputQueue: MutableStateFlow<Set<Movement
     override fun keyUp(keycode: Int): Boolean {
         when (keycode) {
 
+
+            Input.Keys.W -> {
+                playerInputQueue.value = playerInputQueue.value
+                    .minus(MovementDirection.MOVING_UP)
+                    .plus(MovementDirection.NOT_MOVING)
+            }
+
+            Input.Keys.S -> {
+                playerInputQueue.value = playerInputQueue.value
+                    .minus(MovementDirection.MOVING_DOWN)
+                    .plus(MovementDirection.NOT_MOVING)
+            }
+
             Input.Keys.A -> {
-                playerInputQueue.value = playerInputQueue.value.minus(MovementDirection.MOVING_LEFT)
+                playerInputQueue.value = playerInputQueue.value
+                    .minus(MovementDirection.MOVING_LEFT)
+                    .plus(MovementDirection.NOT_MOVING)
             }
 
             Input.Keys.D -> {
-                playerInputQueue.value = playerInputQueue.value.minus(MovementDirection.MOVING_RIGHT)
+                playerInputQueue.value = playerInputQueue.value
+                    .minus(MovementDirection.MOVING_RIGHT)
+                    .plus(MovementDirection.NOT_MOVING)
+
             }
 
             Input.Keys.ESCAPE -> {
