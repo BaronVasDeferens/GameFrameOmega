@@ -1,19 +1,26 @@
-import kotlinx.coroutines.GlobalScope
+package mazescroller
+
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import java.awt.*
+import java.awt.Canvas
+import java.awt.Dimension
+import java.awt.Graphics2D
+import java.awt.Point
 import java.awt.event.KeyListener
 import java.awt.image.BufferedImage
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.JFrame
 import javax.swing.event.MouseInputAdapter
 
 
-class GameFrame(
+class GameFrameEX(
     frameTitle: String,
     width: Int,
     height: Int,
-    imageState: MutableStateFlow<BufferedImage>
+    imageState: MutableStateFlow<BufferedImage>,
+    scope: CoroutineScope
 ) {
 
     private val frame = JFrame()
@@ -22,14 +29,13 @@ class GameFrame(
     private var backgroundImage: BufferedImage? = null
 
 
-    private val hideMouseCursor = true
+    private val hideMouseCursor = AtomicBoolean(false)
 
 
     init {
 
-        val env = GraphicsEnvironment.getLocalGraphicsEnvironment()
-        val device = env.defaultScreenDevice
-        println(">>> refresh rate: ${device.displayMode.refreshRate}")
+//        val env = GraphicsEnvironment.getLocalGraphicsEnvironment()
+//        val device = env.defaultScreenDevice
 
         frame.title = frameTitle
 
@@ -38,7 +44,6 @@ class GameFrame(
 
         canvas.size = Dimension(width, height)
 
-
         frame.add(canvas)
 
         frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
@@ -46,7 +51,7 @@ class GameFrame(
 
         canvas.createBufferStrategy(2)
 
-        if (hideMouseCursor) {
+        if (hideMouseCursor.get()) {
             frame.cursor = frame.toolkit.createCustomCursor(
                 BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB),
                 Point(),
@@ -59,7 +64,7 @@ class GameFrame(
 
         imageState.onEach { image ->
             drawImage(image)
-        }.launchIn(GlobalScope)
+        }.launchIn(scope)
     }
 
     fun setKeyListener(listener: KeyListener) {
