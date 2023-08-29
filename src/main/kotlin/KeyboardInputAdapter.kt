@@ -26,18 +26,22 @@ class KeyboardInputAdapter(private val keyState: MutableStateFlow<Set<KeyState>>
                     keyState.value = setOf(KeyState.QUIT)
                 }
 
+                KeyEvent.VK_LEFT,
                 KeyEvent.VK_A -> {
                     keyState.value = keyState.value.plus(KeyState.MOVE_LEFT)
                 }
 
+                KeyEvent.VK_RIGHT,
                 KeyEvent.VK_D -> {
                     keyState.value = keyState.value.plus(KeyState.MOVE_RIGHT)
                 }
 
+                KeyEvent.VK_UP,
                 KeyEvent.VK_W -> {
                     keyState.value = keyState.value.plus(KeyState.MOVE_UP)
                 }
 
+                KeyEvent.VK_DOWN,
                 KeyEvent.VK_S -> {
                     keyState.value = keyState.value.plus(KeyState.MOVE_DOWN)
                 }
@@ -53,27 +57,22 @@ class KeyboardInputAdapter(private val keyState: MutableStateFlow<Set<KeyState>>
         e?.apply {
             when (e.keyCode) {
 
-                KeyEvent.VK_SPACE -> {
-                    val state = keyState.value
-                    if (!state.contains(KeyState.PAUSE)) {
-                        keyState.value = keyState.value.plus(KeyState.PAUSE)
-                    } else {
-                        keyState.value = keyState.value.minus(KeyState.PAUSE)
-                    }
-                }
-
+                KeyEvent.VK_LEFT,
                 KeyEvent.VK_A -> {
                     keyState.value = keyState.value.minus(KeyState.MOVE_LEFT)
                 }
 
+                KeyEvent.VK_RIGHT,
                 KeyEvent.VK_D -> {
                     keyState.value = keyState.value.minus(KeyState.MOVE_RIGHT)
                 }
 
+                KeyEvent.VK_UP,
                 KeyEvent.VK_W -> {
                     keyState.value = keyState.value.minus(KeyState.MOVE_UP)
                 }
 
+                KeyEvent.VK_DOWN,
                 KeyEvent.VK_S -> {
                     keyState.value = keyState.value.minus(KeyState.MOVE_DOWN)
                 }
