@@ -26,7 +26,7 @@ class MazeScroller {
     private val maze = Maze(50, 50, mazeRoomSize, gameFrameWidth, gameFrameHeight)
     private val numVisibleSquares = 10
 
-    private val playerPiece = PlayerTank(100, 100)
+    private val playerPiece = PlayerTank(100, 100, movementPerUpdate = 5)
     private val renderables = mutableListOf<Renderable>()
 
     // Input: Keyboard
@@ -80,7 +80,7 @@ class MazeScroller {
             playerPiece.move(keyInputState.value, MouseState())
             update()
             render()
-            sleep(10L)
+//            sleep(5L)
         }
         println("Main loop terminated")
         scope.cancel()

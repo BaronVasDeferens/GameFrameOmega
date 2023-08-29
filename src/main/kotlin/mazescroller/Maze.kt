@@ -17,17 +17,17 @@ data class MazeRoom(val x: Int, val y: Int) {           // TODO: rename x -> col
         }
 }
 
-class Maze(val columns: Int,
-           val rows: Int,
-           val blockSize: Int,
-           val windowWidth: Int,
-           val windowHeight: Int) {
+class Maze(private val columns: Int,
+           private val rows: Int,
+           private val blockSize: Int,
+           private val windowWidth: Int,
+           private val windowHeight: Int) {
 
     private val mazeRooms = mutableListOf<MazeRoom>()
 
     // Tracks the position of the visible portion of the maze
-    var windowX: Int = 0
-    var windowY: Int = 0
+    private var windowX: Int = 0
+    private var windowY: Int = 0
 
     // The areas that, when entered by the player, trigger the scrolling movement of the sub-window
     private val leftRightZoneSize = windowWidth / 3
@@ -94,9 +94,7 @@ class Maze(val columns: Int,
             }
         }
 
-        renderedAsBackground = renderMazeToPixmap(windowWidth, windowHeight, 0, 0, rows, blockSize)
-
-
+        renderedAsBackground = renderMazeToPixmap(columns * blockSize, rows * blockSize, 0, 0, rows, blockSize)
     }
 
     private fun getMazeSubsection(startX: Int = 0, startY: Int = 0, subsectionSize: Int): Set<MazeRoom> {
@@ -212,7 +210,7 @@ class Maze(val columns: Int,
 
     fun render(entities: List<Renderable>): BufferedImage {
 
-        val floorCopy = BufferedImage(columns * blockSize, rows * blockSize, BufferedImage.TYPE_INT_ARGB)
+        val floorCopy = BufferedImage(renderedAsBackground.width, renderedAsBackground.height ,BufferedImage.TYPE_INT_ARGB)
         val copyGraphics = floorCopy.createGraphics()
         copyGraphics.drawImage(renderedAsBackground, 0, 0, null)
         entities.forEach { entity ->
