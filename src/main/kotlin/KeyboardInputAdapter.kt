@@ -19,10 +19,11 @@ class KeyboardInputAdapter(private val keyState: MutableStateFlow<Set<KeyState>>
 
     override fun keyPressed(e: KeyEvent?) {
         e?.apply {
+
             when (e.keyCode) {
 
                 KeyEvent.VK_ESCAPE -> {
-                    keyState.value = keyState.value.plus(KeyState.QUIT)
+                    keyState.value = setOf(KeyState.QUIT)
                 }
 
                 KeyEvent.VK_A -> {
@@ -42,7 +43,7 @@ class KeyboardInputAdapter(private val keyState: MutableStateFlow<Set<KeyState>>
                 }
 
                 else -> {
-                    println("Key: ${e.keyChar}")
+                    println("Key PRESSED: ${e.keyCode}")
                 }
             }
         }
@@ -78,7 +79,7 @@ class KeyboardInputAdapter(private val keyState: MutableStateFlow<Set<KeyState>>
                 }
 
                 else -> {
-                    println("Key: ${e.keyChar}")
+                    println("Key RELEASED: ${e.keyChar}")
                 }
             }
         }

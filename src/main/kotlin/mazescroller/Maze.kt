@@ -1,11 +1,13 @@
 package mazescroller
 
+import Player
+import Renderable
 import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 
 
-data class MazeRoom(val x: Int, val y: Int) {
+data class MazeRoom(val x: Int, val y: Int) {           // TODO: rename x -> column, y -> row
 
     var isPassable: Boolean = false
 
@@ -15,9 +17,23 @@ data class MazeRoom(val x: Int, val y: Int) {
         }
 }
 
-class Maze(val columns: Int, val rows: Int) {
+class Maze(val columns: Int,
+           val rows: Int,
+           val blockSize: Int,
+           val windowWidth: Int,
+           val windowHeight: Int) {
 
     private val mazeRooms = mutableListOf<MazeRoom>()
+
+    // Tracks the position of the visible portion of the maze
+    var windowX: Int = 0
+    var windowY: Int = 0
+
+    // The areas that, when entered by the player, trigger the scrolling movement of the sub-window
+    private val leftRightZoneSize = windowWidth / 3
+    private val upDownZoneSize = windowWidth / 3
+
+    private lateinit var renderedAsBackground: BufferedImage
 
     init {
 
@@ -77,15 +93,19 @@ class Maze(val columns: Int, val rows: Int) {
                 }
             }
         }
+
+        renderedAsBackground = renderMazeToPixmap(windowWidth, windowHeight, 0, 0, rows, blockSize)
+
+
     }
 
-    fun getMazeSubsection(startX: Int = 0, startY: Int = 0, subsectionSize: Int): Set<MazeRoom> {
+    private fun getMazeSubsection(startX: Int = 0, startY: Int = 0, subsectionSize: Int): Set<MazeRoom> {
         return getRooms()
             .filter { (it.x >= startX) && (it.x <= startX + subsectionSize) && (it.y >= startY) && (it.y <= startY + subsectionSize) }
             .toSet()
     }
 
-    fun renderMazeToPixmap(imageWidth: Int, imageHeight: Int, startX: Int, startY: Int, subsectionSize: Int, roomSize: Int): BufferedImage {
+    private fun renderMazeToPixmap(imageWidth: Int, imageHeight: Int, startX: Int, startY: Int, subsectionSize: Int, roomSize: Int): BufferedImage {
         val mazeBackgroundImage = BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB)
         val graphics2D = mazeBackgroundImage.graphics as Graphics2D
 
@@ -102,20 +122,20 @@ class Maze(val columns: Int, val rows: Int) {
         return mazeBackgroundImage
     }
 
-    fun cropToWindow(image: BufferedImage, windowsStartX: Int, windowStartY: Int, windowWidth: Int, windowHeight: Int): BufferedImage {
-        return image.getSubimage(windowsStartX, windowStartY, windowWidth, windowHeight)
+    fun cropToWindow(pixelStartX: Int, pixelStartY: Int, windowWidthPixels: Int, windowHeightPixels: Int): BufferedImage {
+        return renderedAsBackground.getSubimage(pixelStartX, pixelStartY, windowWidthPixels, windowHeightPixels)
     }
 
-    fun getRooms(): List<MazeRoom> {
+    private fun getRooms(): List<MazeRoom> {
         return mazeRooms.toList()
     }
 
-    fun getRoom(row: Int, col: Int): MazeRoom? {
+    private fun getRoom(row: Int, col: Int): MazeRoom? {
         // FIXME: inefficient, unsafe! LOL
         return mazeRooms.firstOrNull { it.x == row && it.y == col }
     }
 
-    fun getAdjacentRooms(room: MazeRoom): List<MazeRoom> {
+    private fun getAdjacentRooms(room: MazeRoom): List<MazeRoom> {
         val row = room.x
         val col = room.y
 
@@ -130,6 +150,93 @@ class Maze(val columns: Int, val rows: Int) {
             )
         )
         return adjacentRooms
+    }
+
+    fun moveWindow(hero: Player) {
+
+        val widthInBlocks = columns * blockSize
+        val heightInBlocks = rows * blockSize
+
+        if (hero.isMoving.get() || hero.isCoasting.get()) {
+
+            // RIGHT SCROLL
+            val rightZoneX = windowWidth - leftRightZoneSize
+            if (hero.x + hero.spriteSize >= windowX + rightZoneX) {
+                if (windowX + hero.movementPerUpdate < widthInBlocks - windowWidth) {
+                    windowX += hero.movementPerUpdate
+                    return
+                }
+            }
+
+            // LEFT SCROLL
+            if (hero.x > windowX && hero.x < windowX + leftRightZoneSize) {
+                if (windowX - hero.movementPerUpdate > 0) {
+                    windowX -= hero.movementPerUpdate
+                    return
+                }
+            }
+
+            // UP SCROLL
+            if (hero.y > windowY && hero.y < windowY + upDownZoneSize) {
+                if (windowY - hero.movementPerUpdate > 0) {
+                    windowY -= hero.movementPerUpdate
+                    return
+                }
+            }
+
+            // DOWN SCROLL
+            val downZoneX = windowHeight - upDownZoneSize
+            if (hero.y + hero.spriteSize >= windowY + downZoneX) {
+                if (windowY + hero.movementPerUpdate < heightInBlocks - windowHeight) {
+                    windowY += hero.movementPerUpdate
+                    return
+                }
+            }
+        }
+
+        // Update Tank's internal notion of its position within the window
+        val posX = if (hero.x > windowX) {
+            hero.x - windowX
+        } else {
+            hero.x
+        }
+
+        val posY = if(hero.y > windowY) {
+            hero.y - windowY
+        } else {
+            hero.y
+        }
+
+        hero.setWindowPosition(posX, posY)
+    }
+
+    fun render(entities: List<Renderable>): BufferedImage {
+
+        val floorCopy = BufferedImage(columns * blockSize, rows * blockSize, BufferedImage.TYPE_INT_ARGB)
+        val copyGraphics = floorCopy.createGraphics()
+        copyGraphics.drawImage(renderedAsBackground, 0, 0, null)
+        entities.forEach { entity ->
+            entity.render(copyGraphics)
+        }
+
+//        if (drawDebugArtifacts) {
+//            // Draw window movement zones
+//            copyGraphics.color = Color.RED
+//            copyGraphics.drawRect(windowX, windowY, leftRightZoneSize, windowHeight) // left
+//            copyGraphics.drawRect(windowX + (2 * leftRightZoneSize), windowY, leftRightZoneSize, windowHeight) // right
+//
+//            copyGraphics.color = Color.BLUE
+//            copyGraphics.drawRect(windowX + upDownZoneSize, windowY, upDownZoneSize, upDownZoneSize) // up
+//            copyGraphics.drawRect(
+//                windowX + upDownZoneSize,
+//                windowY + (2 * upDownZoneSize),
+//                upDownZoneSize,
+//                upDownZoneSize
+//            ) // down
+//        }
+
+        copyGraphics.dispose()
+        return floorCopy.getSubimage(windowX, windowY, windowWidth, windowHeight)
     }
 
 }

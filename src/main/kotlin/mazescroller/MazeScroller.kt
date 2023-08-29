@@ -1,11 +1,14 @@
 package mazescroller
 
 import KeyboardInputAdapter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import MouseState
+import PlayerTank
+import Renderable
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
+import java.lang.Thread.sleep
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
 
@@ -16,12 +19,15 @@ fun main(args: Array<String>) {
 
 class MazeScroller {
 
-    private val mazeRoomSize = 64
-    private val maze = Maze(50, 50)
-
     private val gameFrameWidth = 650
     private val gameFrameHeight = 675
 
+    private val mazeRoomSize = 64
+    private val maze = Maze(50, 50, mazeRoomSize, gameFrameWidth, gameFrameHeight)
+    private val numVisibleSquares = 10
+
+    private val playerPiece = PlayerTank(100, 100)
+    private val renderables = mutableListOf<Renderable>()
 
     // Input: Keyboard
     private val keyInputState = MutableStateFlow<Set<KeyboardInputAdapter.KeyState>>(setOf())
@@ -29,49 +35,40 @@ class MazeScroller {
 
     // Finished renders are published to this flow
     private val bufferedImageFlow =
-        MutableStateFlow(BufferedImage(gameFrameWidth, gameFrameHeight, BufferedImage.TYPE_INT_ARGB))
+        MutableStateFlow(BufferedImage(5, 5, BufferedImage.TYPE_INT_ARGB))
 
     // Private coroutine scope
     private val scope = CoroutineScope(Dispatchers.Default)
 
-    private val gameRunning = AtomicBoolean(true)
+    private val isGameRunning = AtomicBoolean(true)
 
 
     init {
 
-        val mazeRender = maze.renderMazeToPixmap(
-            gameFrameWidth,
-            gameFrameHeight,
-            0,
-            0,
-            10,
-            mazeRoomSize
-        )
-
-        bufferedImageFlow.value = maze.cropToWindow(
-            mazeRender,
-            0,
-            0,
-            640,
-            640
-        )
+        renderables.add(playerPiece)
 
         val gameFrame = GameFrameEX("Maze Scroller", gameFrameWidth, gameFrameHeight, bufferedImageFlow, scope)
         gameFrame.setKeyListener(keyListener)
         gameFrame.showFrame()
 
+        // Allow the window to finish rendering (fixes issue where screen would go blank)
+        runBlocking {
+            delay(500)
+        }
+
+        bufferedImageFlow.value = maze.cropToWindow(0, 0, gameFrameWidth, gameFrameHeight)
+
 
         /**
          * MAIN LOOP
          */
-        while (gameRunning.get()) {
+        while (isGameRunning.get()) {
 
             keyInputState.value.forEach { state ->
                 when (state) {
 
                     KeyboardInputAdapter.KeyState.QUIT -> {
-                        gameRunning.set(false)
-                        exitProcess(0)
+                        isGameRunning.set(false)
                     }
 
                     else -> {
@@ -80,22 +77,26 @@ class MazeScroller {
                 }
             }
 
+            playerPiece.move(keyInputState.value, MouseState())
             update()
             render()
+            sleep(10L)
         }
-
+        println("Main loop terminated")
+        scope.cancel()
+        exitProcess(0)
     }
 
     private fun update() {
+        renderables.forEach { sprite ->
+            sprite.update()
+        }
 
+        maze.moveWindow(playerPiece)
     }
 
     private fun render() {
-        val image = BufferedImage(gameFrameWidth, gameFrameHeight, BufferedImage.TYPE_INT_ARGB)
-        val g = image.graphics as Graphics2D
-
-        g.dispose()
-        bufferedImageFlow.value = image
+        bufferedImageFlow.value = maze.render(renderables)
     }
 
 }

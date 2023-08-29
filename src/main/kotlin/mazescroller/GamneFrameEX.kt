@@ -3,6 +3,7 @@ package mazescroller
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import java.awt.Canvas
 import java.awt.Dimension
@@ -16,18 +17,15 @@ import javax.swing.event.MouseInputAdapter
 
 
 class GameFrameEX(
-    frameTitle: String,
-    width: Int,
-    height: Int,
-    imageState: MutableStateFlow<BufferedImage>,
-    scope: CoroutineScope
+    private val frameTitle: String,
+    private val width: Int,
+    private val height: Int,
+    private val bufferedImageFlow: MutableStateFlow<BufferedImage>,
+    private val scope: CoroutineScope
 ) {
 
     private val frame = JFrame()
     private val canvas = Canvas() // TODO: investigate graphicsConfiguration / DoubleBuffer?
-
-    private var backgroundImage: BufferedImage? = null
-
 
     private val hideMouseCursor = AtomicBoolean(false)
 
@@ -62,8 +60,10 @@ class GameFrameEX(
         frame.setLocation(750, 250)
         canvas.requestFocus()
 
-        imageState.onEach { image ->
+        bufferedImageFlow.onEach { image ->
             drawImage(image)
+        }.onCompletion {
+            println("game frame rendering job terminated")
         }.launchIn(scope)
     }
 
@@ -80,14 +80,10 @@ class GameFrameEX(
         frame.isVisible = true
     }
 
-    fun drawImage(image: BufferedImage, x: Int = 0, y: Int = 0) {
-        val graphics = canvas.graphics as Graphics2D
-        backgroundImage?.let {
-            graphics.drawImage(backgroundImage, 0, 0, null)
+    fun drawImage(image: BufferedImage) {
+        with(canvas.graphics as Graphics2D) {
+            drawImage(image, 0, 0, null)
+            dispose()
         }
-
-        graphics.drawImage(image, x, y, null)
-        graphics.dispose()
     }
-
 }
