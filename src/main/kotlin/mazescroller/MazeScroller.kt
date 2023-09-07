@@ -22,11 +22,11 @@ class MazeScroller {
     private val gameFrameWidth = 650
     private val gameFrameHeight = 675
 
-    private val mazeRoomSize = 128
+    private val mazeRoomSize = 64
     private val maze = Maze(50, 50, mazeRoomSize, gameFrameWidth, gameFrameHeight)
-    private val numVisibleSquares = 10
 
-    private val playerPiece = PlayerTank(100, 100, movementPerUpdate = 5)
+
+    private val playerPiece = PlayerTank(100, 100, movementPerUpdate = 1)
     private val renderables = mutableListOf<Renderable>()
 
     // Input: Keyboard

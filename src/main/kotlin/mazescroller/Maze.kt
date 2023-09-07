@@ -210,15 +210,30 @@ class Maze(private val columns: Int,
 
     fun render(entities: List<Renderable>): BufferedImage {
 
-        val floorCopy = BufferedImage(renderedAsBackground.width, renderedAsBackground.height ,BufferedImage.TYPE_INT_ARGB)
-        val copyGraphics = floorCopy.createGraphics()
-        copyGraphics.drawImage(renderedAsBackground, 0, 0, null)
-        entities.forEach { entity ->
-            entity.render(copyGraphics)
+        // determine which squares are in the window (even partially)
+        val xMin = windowX / blockSize.toFloat()
+        val xMax = xMin + (windowWidth / blockSize).toFloat()
+        val yMin = windowY / blockSize.toFloat()
+        val yMax = yMin + (windowHeight / blockSize).toFloat()
+        val roomsInWindow = mazeRooms.filter { it.x in xMin.toInt()..xMax.toInt() && it.y in yMin.toInt() .. yMax.toInt() }
+        val renderedImage = BufferedImage(windowWidth, windowHeight, BufferedImage.TYPE_INT_ARGB)
+
+        val graphics2D = renderedImage.graphics as Graphics2D
+        graphics2D.color = Color.RED
+        graphics2D.fillRect(0,0,windowWidth, windowHeight)
+
+        roomsInWindow.forEach { room ->
+            graphics2D.color = room.color
+            graphics2D.fillRect(((room.x - xMin) * blockSize).toInt(), ((room.y - yMin) * blockSize).toInt(), blockSize, blockSize)
         }
 
-        copyGraphics.dispose()
-        return floorCopy.getSubimage(windowX, windowY, windowWidth, windowHeight)
+        entities.forEach {
+            it.render(graphics2D)
+        }
+
+        graphics2D.dispose()
+        return renderedImage
+
     }
 
 }
