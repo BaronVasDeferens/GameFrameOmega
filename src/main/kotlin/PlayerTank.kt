@@ -23,7 +23,7 @@ abstract class Player(
 class PlayerTank(
     override var x: Int,
     override var y: Int,
-    override val movementPerUpdate: Int = 2,
+    override val movementPerUpdate: Int,
     spriteFileName: String = "tank_body_sprite_sheet.png"
 ) : Player(x, y, movementPerUpdate) {
     private var spriteSheet: BufferedImage = ImageIO.read(javaClass.classLoader.getResourceAsStream(spriteFileName))

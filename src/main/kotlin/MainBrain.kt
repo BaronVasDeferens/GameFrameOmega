@@ -30,7 +30,7 @@ class MainBrain() {
     private val mouseInputState = MutableStateFlow(MouseState())
     private val mouseListener = MouseInputAdapter(mouseInputState)
 
-    private val hero = PlayerTank(100, 100)
+    private val hero = PlayerTank(100, 100, 2)
     private val renderables = mutableListOf<Renderable>()
 
     init {

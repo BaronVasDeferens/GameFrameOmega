@@ -22,7 +22,7 @@ class MazeScroller {
     private val gameFrameWidth = 650
     private val gameFrameHeight = 675
 
-    private val mazeRoomSize = 64
+    private val mazeRoomSize = 128
     private val maze = Maze(50, 50, mazeRoomSize, gameFrameWidth, gameFrameHeight)
     private val numVisibleSquares = 10
 

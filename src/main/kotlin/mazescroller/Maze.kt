@@ -217,22 +217,6 @@ class Maze(private val columns: Int,
             entity.render(copyGraphics)
         }
 
-//        if (drawDebugArtifacts) {
-//            // Draw window movement zones
-//            copyGraphics.color = Color.RED
-//            copyGraphics.drawRect(windowX, windowY, leftRightZoneSize, windowHeight) // left
-//            copyGraphics.drawRect(windowX + (2 * leftRightZoneSize), windowY, leftRightZoneSize, windowHeight) // right
-//
-//            copyGraphics.color = Color.BLUE
-//            copyGraphics.drawRect(windowX + upDownZoneSize, windowY, upDownZoneSize, upDownZoneSize) // up
-//            copyGraphics.drawRect(
-//                windowX + upDownZoneSize,
-//                windowY + (2 * upDownZoneSize),
-//                upDownZoneSize,
-//                upDownZoneSize
-//            ) // down
-//        }
-
         copyGraphics.dispose()
         return floorCopy.getSubimage(windowX, windowY, windowWidth, windowHeight)
     }
