@@ -45,4 +45,8 @@ class Projectile(
     override fun render(graphics2D: Graphics2D) {
         graphics2D.drawImage(image, x - (image.width / 2), y - (image.width / 2), null)
     }
+
+    override fun render(graphics2D: Graphics2D, offsetX: Int, offsetY: Int) {
+        TODO("Not yet implemented")
+    }
 }

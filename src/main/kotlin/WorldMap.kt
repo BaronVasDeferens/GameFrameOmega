@@ -24,6 +24,10 @@ class Block(
         graphics2D.drawImage(image, x * blockSize, y * blockSize, null)
     }
 
+    override fun render(graphics2D: Graphics2D, offsetX: Int, offsetY: Int) {
+        TODO("Not yet implemented")
+    }
+
 }
 
 class WorldMap(

@@ -1,5 +1,7 @@
 package mazescroller
 
+import KeyboardInputAdapter
+import MazeRunner
 import Player
 import Renderable
 import java.awt.Color
@@ -17,11 +19,13 @@ data class MazeRoom(val x: Int, val y: Int) {           // TODO: rename x -> col
         }
 }
 
-class Maze(private val columns: Int,
-           private val rows: Int,
-           private val blockSize: Int,
-           private val windowWidth: Int,
-           private val windowHeight: Int) {
+class Maze(
+    private val columns: Int,
+    private val rows: Int,
+    private val blockSize: Int,
+    private val windowWidth: Int,
+    private val windowHeight: Int
+) {
 
     private val mazeRooms = mutableListOf<MazeRoom>()
 
@@ -71,7 +75,7 @@ class Maze(private val columns: Int,
             val newRoom =
                 try {
                     frontier.removeAt(0)
-                } catch(e: Exception) {
+                } catch (e: Exception) {
                     continue
                 }
 
@@ -103,7 +107,14 @@ class Maze(private val columns: Int,
             .toSet()
     }
 
-    private fun renderMazeToPixmap(imageWidth: Int, imageHeight: Int, startX: Int, startY: Int, subsectionSize: Int, roomSize: Int): BufferedImage {
+    private fun renderMazeToPixmap(
+        imageWidth: Int,
+        imageHeight: Int,
+        startX: Int,
+        startY: Int,
+        subsectionSize: Int,
+        roomSize: Int
+    ): BufferedImage {
         val mazeBackgroundImage = BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB)
         val graphics2D = mazeBackgroundImage.graphics as Graphics2D
 
@@ -112,7 +123,7 @@ class Maze(private val columns: Int,
         graphics2D.drawRect(0, 0, imageWidth, imageHeight)
 
         // Draw the master background
-        getMazeSubsection(startX = startX, startY= startY, subsectionSize = subsectionSize).forEach { room ->
+        getMazeSubsection(startX = startX, startY = startY, subsectionSize = subsectionSize).forEach { room ->
             graphics2D.color = room.color
             graphics2D.fillRect((room.x - startX) * roomSize, (room.y - startY) * roomSize, roomSize, roomSize)
         }
@@ -120,7 +131,12 @@ class Maze(private val columns: Int,
         return mazeBackgroundImage
     }
 
-    fun cropToWindow(pixelStartX: Int, pixelStartY: Int, windowWidthPixels: Int, windowHeightPixels: Int): BufferedImage {
+    fun cropToWindow(
+        pixelStartX: Int,
+        pixelStartY: Int,
+        windowWidthPixels: Int,
+        windowHeightPixels: Int
+    ): BufferedImage {
         return renderedAsBackground.getSubimage(pixelStartX, pixelStartY, windowWidthPixels, windowHeightPixels)
     }
 
@@ -199,7 +215,7 @@ class Maze(private val columns: Int,
             hero.x
         }
 
-        val posY = if(hero.y > windowY) {
+        val posY = if (hero.y > windowY) {
             hero.y - windowY
         } else {
             hero.y
@@ -215,24 +231,60 @@ class Maze(private val columns: Int,
         val xMax = xMin + (windowWidth / blockSize).toFloat()
         val yMin = windowY / blockSize.toFloat()
         val yMax = yMin + (windowHeight / blockSize).toFloat()
-        val roomsInWindow = mazeRooms.filter { it.x in xMin.toInt()..xMax.toInt() && it.y in yMin.toInt() .. yMax.toInt() }
+        val roomsInWindow =
+            mazeRooms.filter { it.x in xMin.toInt()..xMax.toInt() && it.y in yMin.toInt()..yMax.toInt() }
         val renderedImage = BufferedImage(windowWidth, windowHeight, BufferedImage.TYPE_INT_ARGB)
 
         val graphics2D = renderedImage.graphics as Graphics2D
         graphics2D.color = Color.RED
-        graphics2D.fillRect(0,0,windowWidth, windowHeight)
+        graphics2D.fillRect(0, 0, windowWidth, windowHeight)
 
         roomsInWindow.forEach { room ->
             graphics2D.color = room.color
-            graphics2D.fillRect(((room.x - xMin) * blockSize).toInt(), ((room.y - yMin) * blockSize).toInt(), blockSize, blockSize)
+            graphics2D.fillRect(
+                ((room.x - xMin) * blockSize).toInt(),
+                ((room.y - yMin) * blockSize).toInt(),
+                blockSize,
+                blockSize
+            )
         }
 
         entities.forEach {
-            it.render(graphics2D)
+            it.render(graphics2D, windowX, windowY)
         }
 
         graphics2D.dispose()
         return renderedImage
+
+    }
+
+    fun getCollisionRoom(player: MazeRunner, direction: KeyboardInputAdapter.KeyState): MazeRoom? {
+
+        val column = player.x / blockSize
+        val row = player.y / blockSize
+        val room: MazeRoom? = when (direction) {
+            KeyboardInputAdapter.KeyState.MOVE_RIGHT -> {
+                null
+            }
+
+            KeyboardInputAdapter.KeyState.MOVE_LEFT -> {
+                null
+            }
+
+            KeyboardInputAdapter.KeyState.MOVE_UP -> {
+                null
+            }
+
+            KeyboardInputAdapter.KeyState.MOVE_DOWN -> {
+                null
+            }
+
+            else -> {
+                null
+            }
+        }
+
+        return room
 
     }
 

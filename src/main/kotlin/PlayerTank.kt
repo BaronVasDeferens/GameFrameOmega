@@ -225,6 +225,10 @@ class PlayerTank(
             it.render(graphics2D)
         }
     }
+
+    override fun render(graphics2D: Graphics2D, offsetX: Int, offsetY: Int) {
+        TODO("Not yet implemented")
+    }
 }
 
 class MazeRunner(
@@ -377,4 +381,9 @@ class MazeRunner(
         graphics2D.drawImage(targetFrame, x, y, null)
 
     }
+
+    override fun render(graphics2D: Graphics2D, offsetX: Int, offsetY: Int) {
+        val targetFrame =
+            spriteSheet.getSubimage(frameColumn.get() * frameSize, frameRow.get() * frameSize, frameSize, frameSize)
+        graphics2D.drawImage(targetFrame, x - offsetX, y - offsetY, null)    }
 }

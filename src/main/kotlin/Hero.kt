@@ -84,4 +84,8 @@ class Hero (
         graphics2D.drawImage(targetFrame, x, y, null)
     }
 
+    override fun render(graphics2D: Graphics2D, offsetX: Int, offsetY: Int) {
+        TODO("Not yet implemented")
+    }
+
 }

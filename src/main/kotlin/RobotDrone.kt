@@ -31,6 +31,10 @@ class RobotDrone(var x: Int,
         graphics2D.drawImage(subImage, x, y, null)
     }
 
+    override fun render(graphics2D: Graphics2D, offsetX: Int, offsetY: Int) {
+        TODO("Not yet implemented")
+    }
+
 }
 
 class CpuClock(val x: Int, val y: Int, spriteFileName: String = "processor.png"): Renderable {
@@ -46,6 +50,10 @@ class CpuClock(val x: Int, val y: Int, spriteFileName: String = "processor.png")
 
     override fun render(graphics2D: Graphics2D) {
         graphics2D.drawImage(spriteSheet, x, y, null)
+    }
+
+    override fun render(graphics2D: Graphics2D, offsetX: Int, offsetY: Int) {
+        TODO("Not yet implemented")
     }
 
 }
