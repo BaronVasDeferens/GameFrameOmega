@@ -7,6 +7,7 @@ import Renderable
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.awt.image.BufferedImage
+import java.lang.Thread.sleep
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
 
@@ -24,7 +25,7 @@ class MazeScroller {
     private val maze = Maze(50, 50, mazeRoomSize, gameFrameWidth, gameFrameHeight)
 
 
-    private val playerPiece = MazeRunner(100, 100, movementPerUpdate = 1)
+    private val playerPiece = MazeRunner(100, 100, movementPerUpdate = 2)
     private val renderables = mutableListOf<Renderable>()
 
     // Input: Keyboard
@@ -78,7 +79,7 @@ class MazeScroller {
             playerPiece.move(keyInputState.value, MouseState())
             update()
             render()
-//            sleep(5L)
+            sleep(16L)
         }
         println("Main loop terminated")
         scope.cancel()

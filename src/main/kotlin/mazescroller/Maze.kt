@@ -264,7 +264,7 @@ class Maze(
         val row = player.y / blockSize
         val room: MazeRoom? = when (direction) {
             KeyboardInputAdapter.KeyState.MOVE_RIGHT -> {
-                null
+                mazeRooms.firstOrNull{ !it.isPassable && it.x == column + 1 && it.y == row}
             }
 
             KeyboardInputAdapter.KeyState.MOVE_LEFT -> {
