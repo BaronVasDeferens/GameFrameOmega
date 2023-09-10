@@ -1,7 +1,7 @@
 package mazescroller
 
 import KeyboardInputAdapter
-import MazeRunner
+import MazeTank
 import MouseState
 import Renderable
 import kotlinx.coroutines.*
@@ -18,14 +18,13 @@ fun main(args: Array<String>) {
 
 class MazeScroller {
 
-    private val gameFrameWidth = 650
-    private val gameFrameHeight = 675
+    private val gameFrameWidth = 960  // has to be 0.04% smaller than the height. ok, sure
+    private val gameFrameHeight = 1000
 
     private val mazeRoomSize = 64
     private val maze = Maze(50, 50, mazeRoomSize, gameFrameWidth, gameFrameHeight)
 
-
-    private val playerPiece = MazeRunner(100, 100, movementPerUpdate = 2)
+    private val playerPiece = MazeTank(100, 100, movementPerUpdate = 1)   // TODO: place in empty square
     private val renderables = mutableListOf<Renderable>()
 
     // Input: Keyboard
@@ -76,10 +75,12 @@ class MazeScroller {
                 }
             }
 
+            maze.getCollisionRoom(playerPiece, keyInputState.value.firstOrNull())
+
             playerPiece.move(keyInputState.value, MouseState())
             update()
             render()
-            sleep(16L)
+            sleep(5L) // 16 is nice
         }
         println("Main loop terminated")
         scope.cancel()

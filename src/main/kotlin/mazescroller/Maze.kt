@@ -222,9 +222,12 @@ class Maze(
         }
 
         hero.setWindowPosition(posX, posY)
+
     }
 
     fun render(entities: List<Renderable>): BufferedImage {
+
+        val debugMode = true
 
         // determine which squares are in the window (even partially)
         val xMin = windowX / blockSize.toFloat()
@@ -247,6 +250,25 @@ class Maze(
                 blockSize,
                 blockSize
             )
+
+            /**
+             * DEBUG GRID AND COORDINATES
+             */
+            if (debugMode) {
+                graphics2D.color = Color(128,0,0)
+                graphics2D.drawRect(
+                    ((room.x - xMin) * blockSize).toInt(),
+                    ((room.y - yMin) * blockSize).toInt(),
+                    blockSize,
+                    blockSize
+                )
+
+                graphics2D.drawString(
+                    "${room.x},${room.y}",
+                    ((room.x - xMin) * blockSize).toInt() + 8,
+                    ((room.y - yMin) * blockSize).toInt() + 14
+                )
+            }
         }
 
         entities.forEach {
@@ -255,37 +277,47 @@ class Maze(
 
         graphics2D.dispose()
         return renderedImage
-
     }
 
-    fun getCollisionRoom(player: MazeRunner, direction: KeyboardInputAdapter.KeyState): MazeRoom? {
+    fun getCollisionRoom(player: Player, direction: KeyboardInputAdapter.KeyState?): MazeRoom? {
 
-        val column = player.x / blockSize
-        val row = player.y / blockSize
-        val room: MazeRoom? = when (direction) {
-            KeyboardInputAdapter.KeyState.MOVE_RIGHT -> {
-                mazeRooms.firstOrNull{ !it.isPassable && it.x == column + 1 && it.y == row}
-            }
+        // TODO: tank can occupy up to 4 rooms!
+        val column = (player.x + (player.spriteSize / 2)) / blockSize
+        val row = (player.y + (player.spriteSize / 2)) / blockSize
+        val inRoom = getRoom(column, row)
 
-            KeyboardInputAdapter.KeyState.MOVE_LEFT -> {
+        val room: MazeRoom? =
+            if (!player.isMoving.get()) {
                 null
+            } else {
+                when (direction) {
+                    KeyboardInputAdapter.KeyState.MOVE_RIGHT -> {
+                        mazeRooms.firstOrNull { !it.isPassable && it.x == column + 1 && it.y == row }
+                    }
+
+                    KeyboardInputAdapter.KeyState.MOVE_LEFT -> {
+                        mazeRooms.firstOrNull { !it.isPassable && it.x == column - 1 && it.y == row }
+                    }
+
+                    KeyboardInputAdapter.KeyState.MOVE_UP -> {
+                        mazeRooms.firstOrNull { !it.isPassable && it.x == column && it.y == row - 1 }
+                    }
+
+                    KeyboardInputAdapter.KeyState.MOVE_DOWN -> {
+                        mazeRooms.firstOrNull { !it.isPassable && it.x == column && it.y == row + 1 }
+                    }
+
+                    else -> {
+                        null
+                    }
+                }
             }
 
-            KeyboardInputAdapter.KeyState.MOVE_UP -> {
-                null
-            }
 
-            KeyboardInputAdapter.KeyState.MOVE_DOWN -> {
-                null
-            }
+        println("inRoom: $inRoom headedTo: $room")
 
-            else -> {
-                null
-            }
-        }
 
         return room
-
     }
 
 }
