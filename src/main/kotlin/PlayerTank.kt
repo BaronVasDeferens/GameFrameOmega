@@ -544,13 +544,21 @@ class MazeTank(
 
 
     fun getHitBox(offsetX: Int = 0, offsetY: Int = 0): Polygon {
-        val scaledHitBoxSize = (frameSize * 1.00).toInt()
+        val scaledHitBoxSize = 40
         val poly = Polygon()
+
         with(poly) {
-            addPoint(x - offsetX, y - offsetY)
-            addPoint(x + scaledHitBoxSize - offsetX, y - offsetY)
-            addPoint(x + scaledHitBoxSize - offsetX, y + scaledHitBoxSize - offsetY)
-            addPoint(x - offsetX, y + scaledHitBoxSize - offsetY)
+            // Border around ENTIRE sprite
+//            addPoint(x - offsetX, y - offsetY)
+//            addPoint(x + scaledHitBoxSize - offsetX, y - offsetY)
+//            addPoint(x + scaledHitBoxSize - offsetX, y + scaledHitBoxSize - offsetY)
+//            addPoint(x - offsetX, y + scaledHitBoxSize - offsetY)
+
+            // Scaled to the center (40x40)
+            addPoint(x - offsetX + 12, y - offsetY + 12)
+            addPoint(x - offsetX + 12 + scaledHitBoxSize, y - offsetY + 12)
+            addPoint(x - offsetX + 12 + scaledHitBoxSize, y - offsetY + 12 + scaledHitBoxSize)
+            addPoint(x - offsetX + 12, y - offsetY + 12 + scaledHitBoxSize)
         }
 
         return poly
