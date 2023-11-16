@@ -6,6 +6,7 @@ import Player
 import Renderable
 import java.awt.Color
 import java.awt.Graphics2D
+import java.awt.Polygon
 import java.awt.image.BufferedImage
 
 
@@ -17,6 +18,15 @@ data class MazeRoom(val x: Int, val y: Int) {           // TODO: rename x -> col
         get() = if (isPassable) Color.DARK_GRAY else {
             Color.BLACK
         }
+
+    fun getHitBox(size: Int = 64): Polygon {
+        return Polygon().apply {
+            addPoint(x * size, y * size)
+            addPoint((x * size) + size, y * size)
+            addPoint((x * size) + size, (y * size) + size)
+            addPoint(x * size, (y * size) + size)
+        }
+    }
 }
 
 class Maze(
@@ -255,7 +265,7 @@ class Maze(
              * DEBUG GRID AND COORDINATES
              */
             if (debugMode) {
-                graphics2D.color = Color(128,0,0)
+                graphics2D.color = Color(64,0,0)
                 graphics2D.drawRect(
                     ((room.x - xMin) * blockSize).toInt(),
                     ((room.y - yMin) * blockSize).toInt(),
@@ -314,10 +324,9 @@ class Maze(
             }
 
 
-        println("inRoom: $inRoom headedTo: $room")
+        // println("inRoom: $inRoom headedTo: $room")
 
 
         return room
     }
-
 }
